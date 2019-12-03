@@ -1,0 +1,47 @@
+
+    .line {
+      fill: none;
+      stroke: steelblue;
+      stroke-width: 1.5px;
+      opacity: 0.3;
+    }
+
+    .line:hover {
+      fill: none;
+      stroke: red;
+      stroke-width: 3px;
+      opacity: 1;
+    }
+
+    .select-rect {
+      fill: turquoise;
+    }
+    path.selected {
+      fill: none;
+      stroke: blue;
+      stroke-width: 3px;
+      opacity: 1;
+
+    }
+
+
+    .task {
+      fill: navy;
+      font-weight: 500;
+      font-size: xx-small;
+      font-family: 'Courier New', Courier, monospace;
+    }
+
+    .task-rect {
+      fill: rebeccapurple;
+      opacity: 0.5;
+    }
+
+    .task-rect:hover {
+      opacity: 0.8;
+    }
+
+    rect.selected {
+      fill:yellow;
+      opacity: 0.5;
+    }
