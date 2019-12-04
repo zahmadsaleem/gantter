@@ -1,6 +1,6 @@
 var w = 800;
-var h = 2500;
-var taskht = 8;
+var h = 5000;
+var taskht = 20;
 
 var svg = d3.select("body")
     .append("svg")
@@ -11,6 +11,9 @@ var svg = d3.select("body")
 
 var data;
 var group;
+var gantt;
+var tree;
+var hierarchy;
 var connections = [];
 
 function removeSelection() {
@@ -31,76 +34,141 @@ function getTaskByID(id) {
 
 // remove spaces from json keys
 // process data
-d3.json("./schedule.json", (d) => {
-    data = JSON.parse(JSON.stringify(d).replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, "")));
-    data.forEach((item, index, arr) => {
-        var preArray = [];
-        var _preArray = item.Predecessors.split(";");
-        _preArray.forEach((link) => {
-            var preObject = {};
-            const rePre = /^\d+/g;
-            const reType = /SS|FS|FF|SF/g;
-            const reSign = /\+|-/g;
-            const reAdd = /\d+(?=\sday)/g;
+d3.json("./schedule.json")
+    .then((d) => {
+        data = JSON.parse(JSON.stringify(d).replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, "")));
+        data.forEach((item, index, arr) => {
+            var preArray = [];
+            var _preArray = item.Predecessors.split(";");
+            _preArray.forEach((link) => {
+                var preObject = {};
+                const rePre = /^\d+/g;
+                const reType = /SS|FS|FF|SF/g;
+                const reSign = /\+|-/g;
+                const reAdd = /\d+(?=\sday)/g;
 
-            // process dependencies
-            // eg : "119FS+50 days"
-            var _pre = rePre.exec(link);
-            if (_pre) {
-                preObject.pre = _pre[0];
-                var _type = reType.exec(link);
-                _type ? preObject.type = _type[0] : preObject.type = undefined;
-                _sign = reSign.exec(link);
-                if (_sign) {
-                    preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
+                // process dependencies
+                // eg : "119FS+50 days"
+                var _pre = rePre.exec(link);
+                if (_pre) {
+                    preObject.pre = _pre[0];
+                    var _type = reType.exec(link);
+                    _type ? preObject.type = _type[0] : preObject.type = undefined;
+                    _sign = reSign.exec(link);
+                    if (_sign) {
+                        preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
+                    } else {
+                        preObject.addition = 0;
+                    }
+                    connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
                 } else {
+                    preObject.pre = undefined;
+                    preObject.type = undefined;
                     preObject.addition = 0;
                 }
-                connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
+                preArray.push(preObject);
+            });
+            item.preArray = preArray;
+
+            // convert indent to parent<>child list
+            let _s = item.TaskName.match(/^\s+\w/g);
+            _s ? item.indent = _s[0].search(/\S/g) / 4 : item.indent = 0;
+            item.TaskName = item.TaskName.trim()
+            item.children = [];
+            var _parent;
+            if (index > 0) {
+                if (item.indent > arr[index - 1].indent) {
+                    _parent = arr[index - 1].parents.concat(arr[index - 1].ID);
+                    item.parents = _parent;
+                } else {
+                    _parent = arr[index - 1].parents.slice(0, item.indent);
+                    item.parents = _parent;
+                }
+                if (_parent.length > 0) {
+                    arr[_parent.slice(-1)[0]].children.push(item.ID);
+                }
             } else {
-                preObject.pre = undefined;
-                preObject.type = undefined;
-                preObject.addition = 0;
+                item.parents = [];
             }
-            preArray.push(preObject);
         });
-        item.preArray = preArray;
 
-        // convert indent to parent<>child list
-        let _s = item.TaskName.match(/^\s+\w/g);
-        _s ? item.indent = _s[0].search(/\S/g) / 4 : item.indent = 0;
-        item.TaskName = item.TaskName.trim()
-        item.children = [];
-        var _parent;
-        if (index > 0) {
-            if (item.indent > arr[index - 1].indent) {
-                _parent = arr[index - 1].parents.concat(arr[index - 1].ID);
-                item.parents = _parent;
-            } else {
-                _parent = arr[index - 1].parents.slice(0, item.indent);
-                item.parents = _parent;
-            }
-            if (_parent.length > 0) {
-                arr[_parent.slice(-1)[0]].children.push(item.ID);
-            }
-        } else {
-            item.parents = [];
-        }
+        console.log(data);
+        // console.log(connections);
+
+        afterJSONLoad();
     });
-
-    console.log(data);
-    // console.log(connections);
-
-    afterJSONLoad();
-});
 
 // main function after data processing
 function afterJSONLoad() {
+
     var stratify = d3.stratify()
         .id(d => d.ID)
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
-    
-    var hierarchy = stratify(data);
+
+    hierarchy = stratify(data);
+    console.log(hierarchy);
+
+    var index = 1;
+    tree = d3.tree(hierarchy);
+
+    /* 
+    HACK : This is temporary, 
+    make it work with native tree and
+    enter exit function
+    TODO : Animation
+    */
+    function render(grp, node) {
+        function toggleChildren(d){
+            if (d.children) {
+                d._children = d.children;
+                d.children = null;
+            } else if (d._children) {
+                d.children = d._children;
+                d._children = null;
+            }
+        }
+        _grp = grp.append("g").datum(node.data)
+        //append to group
+        _grp.append("rect")
+            .attr("id", d=> "id" + d.ID)
+            .attr("x", d=> timeScale(Date.parse(d.Start)))
+            .attr("y", heightScale(index))
+            .attr("width", d=> timeScale(Date.parse(d.Finish)) - timeScale(Date.parse(d.Start)))
+            .attr("height", taskht)
+            .attr("rx", 2)
+            .attr("ry", 2)
+            .attr("class", "task-rect")
+            .on("click", function (d) {
+                d3.event.stopPropagation();
+                removeSelection();
+                Array.from(document.querySelectorAll("#task-connections path"))
+                    .filter((k) => k.id.split("_").includes(d.ID))
+                    .forEach(el => d3.select(el).attr("class", "selected"));
+                d3.select("#id" + d.ID).attr("class", "selected");
+            })
+            .on("dblclick", function (d) {
+                index = 1;
+                gantt.selectAll("rect").remove()
+                gantt.selectAll("text").remove()
+                toggleChildren(node);
+                render(gantt,hierarchy);
+            });
+        _grp.append("text")
+            .text(d=>d.ID)
+            .attr("x", d=> timeScale(Date.parse(d.Start)))
+            .attr("y", heightScale(index) + taskht)
+            .attr("class", "task");
+        index++;
+        //on click toggle children
+        //change position of ids after node
+        if (node.children) {
+            let group1 = grp.append("g");
+            node.children.forEach((child) => {
+                render(group1, child);
+            });
+        }
+    }
+
 
     var timeScale = d3.scaleTime()
         .domain([d3.min(data, d => Date.parse(d.Start)),
@@ -126,40 +194,46 @@ function afterJSONLoad() {
         .domain([1, data.length])
         .range([0, h - 50]);
 
-    var gantt = svg.append("g")
+    gantt = svg.append("g")
+        .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
 
-    group = gantt.append("g")
-        // .attr('transform', 'translate(0,25)')
-        .attr("id", "task-rectangles")
-        .selectAll("g")
-        .data(data)
-        .enter()
-        .append("g")
-        .on("click", function (d) {
-            d3.event.stopPropagation();
-            removeSelection();
-            Array.from(document.querySelectorAll("#task-connections path"))
-                .filter((k) => k.id.split("_").includes(d.ID))
-                .forEach(el => d3.select(el).attr("class", "selected"));
-            d3.select("#id" + d.ID).attr("class", "selected");
-        });
+    // group = gantt.append("g")
+    //     // .attr('transform', 'translate(0,25)')
+    //     .attr("id", "task-rectangles")
+    //     .selectAll("g")
+    //     .data(data)
+    //     .enter()
+    //     .append("g")
+    //     .on("click", function (d) {
+    //         d3.event.stopPropagation();
+    //         removeSelection();
+    //         Array.from(document.querySelectorAll("#task-connections path"))
+    //             .filter((k) => k.id.split("_").includes(d.ID))
+    //             .forEach(el => d3.select(el).attr("class", "selected"));
+    //         d3.select("#id" + d.ID).attr("class", "selected");
+    //     });
 
     // task rectangles
-    group.append("rect")
-        .attr("x", (d) => timeScale(Date.parse(d.Start)))
-        .attr("y", (d, i) => heightScale(+(d.ID)))
-        .attr("width", (d) => timeScale(Date.parse(d.Finish)) - timeScale(Date.parse(d.Start)))
-        .attr("height", 10)
-        .attr("class", "task-rect")
-        .attr("id", (d) => "id" + d.ID);
+    // rect = group.append("rect")
+    //     .attr("x", (d) => timeScale(Date.parse(d.Start)))
+    //     .attr("y", (d, i) => heightScale(+(d.ID)))
+    //     .attr("width", (d) => timeScale(Date.parse(d.Finish)) - timeScale(Date.parse(d.Start)))
+    //     .attr("height", taskht)
+    //     .attr("rx", 2)
+    //     .attr("ry", 2)
+    //     .attr("class", "task-rect")
+    //     .attr("id", (d) => "id" + d.ID);
+
 
     // taask names
-    group.append("text")
-        .text((d) => d.ID)
-        .attr("x", (d) => timeScale(Date.parse(d.Start)))
-        .attr("y", (d) => heightScale(+(d.ID)) + taskht)
-        .attr("class", "task");
+    // group.append("text")
+    //     .text((d) => d.ID)
+    //     .attr("x", (d) => timeScale(Date.parse(d.Start)))
+    //     .attr("y", (d) => heightScale(+(d.ID)) + taskht)
+    //     .attr("class", "task");
+
+    render(gantt, hierarchy);
 
     var lineGenerator = d3.line()
         .x((d) => d[0])
@@ -213,45 +287,43 @@ function afterJSONLoad() {
         return lineGenerator(ptList);
     }
 
-
     function checkSelection(id) {
         return d3.select("#id" + id).attr("class").includes("selected");
     }
 
     // connection lines
-    gantt.append("g")
-        .attr("id", "task-connections")
-        .selectAll("path")
-        .data(connections)
-        .enter()
-        .append("path")
-        .attr("class", "line")
-        .attr("id", d => d[1].ID + "_" + d[0].ID)
-        .attr("d", ptGenerator)
-        .on("mouseover", function (k) {
-            if (!checkSelection(k[0].ID)) {
-                d3.select("#id" + k[0].ID).attr("class", "select-rect");
-            }
-            if (!checkSelection(k[1].ID)) {
-                d3.select("#id" + k[1].ID).attr("class", "select-rect");
-            }
-        })
-        .on("mouseout", function (k) {
-            if (!checkSelection(k[0].ID)) {
-                d3.select("#id" + k[0].ID).attr("class", "task-rect");
-            }
-            if (!checkSelection(k[1].ID)) {
-                d3.select("#id" + k[1].ID).attr("class", "task-rect");
-            }
-        })
-        .on("click", function (k) {
-            d3.event.stopPropagation()
-            if (!d3.event.shiftKey) {
-                removeSelection();
-            }
-            d3.select("#id" + k[0].ID).attr("class", "selected");
-            d3.select("#id" + k[1].ID).attr("class", "selected");
-            d3.select(this).attr("class", "selected");
-            
-        });
+    // gantt.append("g")
+    //     .attr("id", "task-connections")
+    //     .selectAll("path")
+    //     .data(connections)
+    //     .enter()
+    //     .append("path")
+    //     .attr("class", "line")
+    //     .attr("id", d => d[1].ID + "_" + d[0].ID)
+    //     .attr("d", ptGenerator)
+    //     .on("mouseover", function (k) {
+    //         if (!checkSelection(k[0].ID)) {
+    //             d3.select("#id" + k[0].ID).attr("class", "select-rect");
+    //         }
+    //         if (!checkSelection(k[1].ID)) {
+    //             d3.select("#id" + k[1].ID).attr("class", "select-rect");
+    //         }
+    //     })
+    //     .on("mouseout", function (k) {
+    //         if (!checkSelection(k[0].ID)) {
+    //             d3.select("#id" + k[0].ID).attr("class", "task-rect");
+    //         }
+    //         if (!checkSelection(k[1].ID)) {
+    //             d3.select("#id" + k[1].ID).attr("class", "task-rect");
+    //         }
+    //     })
+    //     .on("click", function (k) {
+    //         d3.event.stopPropagation()
+    //         if (!d3.event.shiftKey) {
+    //             removeSelection();
+    //         }
+    //         d3.select("#id" + k[0].ID).attr("class", "selected");
+    //         d3.select("#id" + k[1].ID).attr("class", "selected");
+    //         d3.select(this).attr("class", "selected");
+    //     });
 }
