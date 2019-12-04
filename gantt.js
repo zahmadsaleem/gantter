@@ -38,6 +38,11 @@ d3.json("./schedule.json")
     .then((d) => {
         data = JSON.parse(JSON.stringify(d).replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, "")));
         data.forEach((item, index, arr) => {
+            let _dur = item.Duration.match(/^\d+/g);
+            item.Duration = _dur ? +_dur[0] : 1;
+            item.Finish = Date.parse(item.Finish);
+            item.Start = Date.parse(item.Start);
+
             var preArray = [];
             var _preArray = item.Predecessors.split(";");
             _preArray.forEach((link) => {
@@ -109,6 +114,7 @@ function afterJSONLoad() {
     console.log(hierarchy);
 
     var index = 1;
+    var collapsed = [];
     tree = d3.tree(hierarchy);
 
     /* 
@@ -118,7 +124,7 @@ function afterJSONLoad() {
     TODO : Animation
     */
     function render(grp, node) {
-        function toggleChildren(d){
+        function toggleChildren(d) {
             if (d.children) {
                 d._children = d.children;
                 d.children = null;
@@ -130,10 +136,10 @@ function afterJSONLoad() {
         _grp = grp.append("g").datum(node.data)
         //append to group
         _grp.append("rect")
-            .attr("id", d=> "id" + d.ID)
-            .attr("x", d=> timeScale(Date.parse(d.Start)))
+            .attr("id", d => "id" + d.ID)
+            .attr("x", d => timeScale(d.Start))
             .attr("y", heightScale(index))
-            .attr("width", d=> timeScale(Date.parse(d.Finish)) - timeScale(Date.parse(d.Start)))
+            .attr("width", d => timeScale(d.Finish) - timeScale(d.Start))
             .attr("height", taskht)
             .attr("rx", 2)
             .attr("ry", 2)
@@ -150,12 +156,27 @@ function afterJSONLoad() {
                 index = 1;
                 gantt.selectAll("rect").remove()
                 gantt.selectAll("text").remove()
+                // if (d.children) {
+
+                //     let _connex = connections.filter((k) => {
+                //         let boolList = [];
+                //         k.forEach(r => r.id.split("_")
+                //             .forEach(m => boolList.push(d.children.includes(m))));
+                //         return boolList.every(d => d ? true : false)
+                //     });
+                //     drawConnections(_connex);
+                // }
                 toggleChildren(node);
-                render(gantt,hierarchy);
+                render(gantt, hierarchy);
             });
         _grp.append("text")
-            .text(d=>d.ID)
-            .attr("x", d=> timeScale(Date.parse(d.Start)))
+            .text(d => d.TaskName)
+            .attr("x", 0)
+            .attr("y", heightScale(index)+taskht/2)
+            .attr("class", "task");
+        _grp.append("text")
+            .text(d => d.ID)
+            .attr("x", d => timeScale(d.Start))
             .attr("y", heightScale(index) + taskht)
             .attr("class", "task");
         index++;
@@ -171,8 +192,8 @@ function afterJSONLoad() {
 
 
     var timeScale = d3.scaleTime()
-        .domain([d3.min(data, d => Date.parse(d.Start)),
-        d3.max(data, d => Date.parse(d.Finish))])
+        .domain([d3.min(data, d => d.Start),
+        d3.max(data, d => d.Finish)])
         .range([0, w - 50]);
 
     var xAxis = d3.axisBottom(timeScale)
@@ -216,9 +237,9 @@ function afterJSONLoad() {
 
     // task rectangles
     // rect = group.append("rect")
-    //     .attr("x", (d) => timeScale(Date.parse(d.Start)))
+    //     .attr("x", (d) => timeScale(d.Start))
     //     .attr("y", (d, i) => heightScale(+(d.ID)))
-    //     .attr("width", (d) => timeScale(Date.parse(d.Finish)) - timeScale(Date.parse(d.Start)))
+    //     .attr("width", (d) => timeScale(d.Finish) - timeScale(d.Start))
     //     .attr("height", taskht)
     //     .attr("rx", 2)
     //     .attr("ry", 2)
@@ -229,7 +250,7 @@ function afterJSONLoad() {
     // taask names
     // group.append("text")
     //     .text((d) => d.ID)
-    //     .attr("x", (d) => timeScale(Date.parse(d.Start)))
+    //     .attr("x", (d) => timeScale(d.Start))
     //     .attr("y", (d) => heightScale(+(d.ID)) + taskht)
     //     .attr("class", "task");
 
@@ -292,38 +313,41 @@ function afterJSONLoad() {
     }
 
     // connection lines
-    // gantt.append("g")
-    //     .attr("id", "task-connections")
-    //     .selectAll("path")
-    //     .data(connections)
-    //     .enter()
-    //     .append("path")
-    //     .attr("class", "line")
-    //     .attr("id", d => d[1].ID + "_" + d[0].ID)
-    //     .attr("d", ptGenerator)
-    //     .on("mouseover", function (k) {
-    //         if (!checkSelection(k[0].ID)) {
-    //             d3.select("#id" + k[0].ID).attr("class", "select-rect");
-    //         }
-    //         if (!checkSelection(k[1].ID)) {
-    //             d3.select("#id" + k[1].ID).attr("class", "select-rect");
-    //         }
-    //     })
-    //     .on("mouseout", function (k) {
-    //         if (!checkSelection(k[0].ID)) {
-    //             d3.select("#id" + k[0].ID).attr("class", "task-rect");
-    //         }
-    //         if (!checkSelection(k[1].ID)) {
-    //             d3.select("#id" + k[1].ID).attr("class", "task-rect");
-    //         }
-    //     })
-    //     .on("click", function (k) {
-    //         d3.event.stopPropagation()
-    //         if (!d3.event.shiftKey) {
-    //             removeSelection();
-    //         }
-    //         d3.select("#id" + k[0].ID).attr("class", "selected");
-    //         d3.select("#id" + k[1].ID).attr("class", "selected");
-    //         d3.select(this).attr("class", "selected");
-    //     });
+    function drawConnections(connections) {
+        gantt.append("g")
+            .attr("id", "task-connections")
+            .selectAll("path")
+            .data(connections)
+            .enter()
+            .append("path")
+            .attr("class", "line")
+            .attr("id", d => d[1].ID + "_" + d[0].ID)
+            .attr("d", ptGenerator)
+            .on("mouseover", function (k) {
+                if (!checkSelection(k[0].ID)) {
+                    d3.select("#id" + k[0].ID).attr("class", "select-rect");
+                }
+                if (!checkSelection(k[1].ID)) {
+                    d3.select("#id" + k[1].ID).attr("class", "select-rect");
+                }
+            })
+            .on("mouseout", function (k) {
+                if (!checkSelection(k[0].ID)) {
+                    d3.select("#id" + k[0].ID).attr("class", "task-rect");
+                }
+                if (!checkSelection(k[1].ID)) {
+                    d3.select("#id" + k[1].ID).attr("class", "task-rect");
+                }
+            })
+            .on("click", function (k) {
+                d3.event.stopPropagation()
+                if (!d3.event.shiftKey) {
+                    removeSelection();
+                }
+                d3.select("#id" + k[0].ID).attr("class", "selected");
+                d3.select("#id" + k[1].ID).attr("class", "selected");
+                d3.select(this).attr("class", "selected");
+            })
+    }
+    drawConnections(connections);
 }
