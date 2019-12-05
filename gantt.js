@@ -184,7 +184,7 @@ function afterJSONLoad() {
         //task names
         _grp.append("text")
             .text(d => hasChildren(d) ? d.TaskName.toUpperCase() : d.TaskName)
-            .attr("x", d=>hasChildren(d) ? timeScale(d.Start) + 10 : 10)
+            .attr("x", d => hasChildren(d) ? timeScale(d.Start) + 10 : 10)
             .attr("y", heightScale(index) + taskht / 2)
             .attr("class", "task");
         //task IDs
@@ -324,4 +324,27 @@ function afterJSONLoad() {
     //execute 
     render(gantt, hierarchy);
     drawConnections();
+    var dragPosition = d3.mean(timeScale.range());
+    gantt.append("path")
+        .attr("id", "date-selector")
+        .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
+        .call(d3.drag()
+            .on("drag", function () {
+                let checkMouseX = pos => {
+                    if (pos < timeScale.range()[1] && pos > timeScale.range()[0]) {
+                        dragPosition = pos
+                        return pos;
+                    } else {
+                        return dragPosition;
+                    }
+                }
+                d3.select(this)
+                    .attr("d", lineGenerator([[checkMouseX(d3.event.x), 0], [checkMouseX(d3.event.x), h]]));
+                // console.log(timeScale.invert(d3.event.x))
+
+            }
+        ));
+    
+    console.log(timeScale.range())
+    
 }
