@@ -15,6 +15,7 @@ var gantt;
 var tree;
 var hierarchy;
 var connections = [];
+var queue = [];
 
 function removeSelection() {
     document.querySelectorAll("path.selected").forEach(function (el) {
@@ -32,17 +33,23 @@ function getTaskByID(id) {
     return task ? task[0] : undefined;
 }
 
-// remove spaces from json keys
+
 // process data
 d3.json("./schedule.json")
     .then((d) => {
-        data = JSON.parse(JSON.stringify(d).replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, "")));
+        // remove spaces from json keys
+        data = JSON.parse(
+            JSON.stringify(d)
+                .replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, ""))
+        );
         data.forEach((item, index, arr) => {
+            // convert raw data types
             let _dur = item.Duration.match(/^\d+/g);
             item.Duration = _dur ? +_dur[0] : 1;
             item.Finish = Date.parse(item.Finish);
             item.Start = Date.parse(item.Start);
 
+            // process dependencies
             var preArray = [];
             var _preArray = item.Predecessors.split(";");
             _preArray.forEach((link) => {
@@ -52,7 +59,6 @@ d3.json("./schedule.json")
                 const reSign = /\+|-/g;
                 const reAdd = /\d+(?=\sday)/g;
 
-                // process dependencies
                 // eg : "119FS+50 days"
                 var _pre = rePre.exec(link);
                 if (_pre) {
@@ -90,7 +96,7 @@ d3.json("./schedule.json")
                     item.parents = _parent;
                 }
                 if (_parent.length > 0) {
-                    arr[_parent.slice(-1)[0]].children.push(item.ID);
+                    arr[_parent.slice(-1)[0] - 1].children.push(item.ID);
                 }
             } else {
                 item.parents = [];
@@ -123,17 +129,18 @@ function afterJSONLoad() {
     enter exit function
     TODO : Animation
     */
-    function render(grp, node) {
-        function toggleChildren(d) {
-            if (d.children) {
-                d._children = d.children;
-                d.children = null;
-            } else if (d._children) {
-                d.children = d._children;
-                d._children = null;
-            }
+    function toggleChildren(d) {
+        if (d.children) {
+            d._children = d.children;
+            d.children = null;
+        } else if (d._children) {
+            d.children = d._children;
+            d._children = null;
         }
-        _grp = grp.append("g").datum(node.data)
+    }
+    function render(grp, node) {
+        queue.push(node.data);
+        _grp = grp.append("g").datum(node.data);
         //append to group
         _grp.append("rect")
             .attr("id", d => "id" + d.ID)
@@ -143,7 +150,13 @@ function afterJSONLoad() {
             .attr("height", taskht)
             .attr("rx", 2)
             .attr("ry", 2)
-            .attr("class", "task-rect")
+            .attr("class", d => {
+                if (d.children) {
+                    return d.children.length == 0 ? "task-rect" : "task-parent";
+                } else {
+                    return d._children.length == 0 ? "task-rect" : "task-parent";
+                }
+            })
             .on("click", function (d) {
                 d3.event.stopPropagation();
                 removeSelection();
@@ -153,26 +166,21 @@ function afterJSONLoad() {
                 d3.select("#id" + d.ID).attr("class", "selected");
             })
             .on("dblclick", function (d) {
-                index = 1;
-                gantt.selectAll("rect").remove()
-                gantt.selectAll("text").remove()
-                // if (d.children) {
-
-                //     let _connex = connections.filter((k) => {
-                //         let boolList = [];
-                //         k.forEach(r => r.id.split("_")
-                //             .forEach(m => boolList.push(d.children.includes(m))));
-                //         return boolList.every(d => d ? true : false)
-                //     });
-                //     drawConnections(_connex);
-                // }
-                toggleChildren(node);
-                render(gantt, hierarchy);
+                if (d.children) {
+                    queue = [];
+                    index = 1;
+                    gantt.selectAll("rect").remove()
+                    gantt.selectAll("text").remove()
+                    gantt.selectAll("#task-connections").remove()
+                    toggleChildren(node);
+                    render(gantt, hierarchy);
+                    drawConnections();
+                }
             });
         _grp.append("text")
             .text(d => d.TaskName)
-            .attr("x", 0)
-            .attr("y", heightScale(index)+taskht/2)
+            .attr("x", 10)
+            .attr("y", heightScale(index) + taskht / 2)
             .attr("class", "task");
         _grp.append("text")
             .text(d => d.ID)
@@ -191,30 +199,33 @@ function afterJSONLoad() {
     }
 
 
+
     var timeScale = d3.scaleTime()
         .domain([d3.min(data, d => d.Start),
         d3.max(data, d => d.Finish)])
         .range([0, w - 50]);
 
+    // axis
     var xAxis = d3.axisBottom(timeScale)
         .ticks(d3.timeWeek)
         .tickFormat(d3.timeFormat('%d %b'));
 
-    var grid = svg.append('g')
-        .attr('class', 'grid')
-        .attr('transform', 'translate(20)')
-        .call(xAxis)
-        .selectAll("text")
-        .style("text-anchor", "middle")
-        .attr("fill", "#000")
-        .attr("stroke", "none")
-        .attr("font-size", 10)
-        .attr("dy", "1em");
+    // var grid = svg.append('g')
+    //     .attr('class', 'grid')
+    //     .attr('transform', 'translate(20)')
+    //     .call(xAxis)
+    //     .selectAll("text")
+    //     .style("text-anchor", "middle")
+    //     .attr("fill", "#000")
+    //     .attr("stroke", "none")
+    //     .attr("font-size", 10)
+    //     .attr("dy", "1em");
 
     var heightScale = d3.scaleLinear()
         .domain([1, data.length])
         .range([0, h - 50]);
 
+    // main container for gantt chart
     gantt = svg.append("g")
         .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
@@ -254,7 +265,7 @@ function afterJSONLoad() {
     //     .attr("y", (d) => heightScale(+(d.ID)) + taskht)
     //     .attr("class", "task");
 
-    render(gantt, hierarchy);
+
 
     var lineGenerator = d3.line()
         .x((d) => d[0])
@@ -280,10 +291,10 @@ function afterJSONLoad() {
             var _typeb = "Start";
         }
 
-        let xa = timeScale(Date.parse(a[_typea]));
-        let ya = heightScale(a.ID);
-        let xb = timeScale(Date.parse(b[_typeb]));
-        let yb = heightScale(b.ID);
+        let xa = timeScale(a[_typea]);
+        let ya = heightScale(queue.indexOf(a) + 1);
+        let xb = timeScale(b[_typeb]);
+        let yb = heightScale(queue.indexOf(b) + 1);
         let sign = +a.ID > +b.ID ? - 1 : 1;// prdecessor id > item id 
         let factor = offset * sign;
         if (_typea == "Start") {
@@ -313,11 +324,24 @@ function afterJSONLoad() {
     }
 
     // connection lines
-    function drawConnections(connections) {
+    function drawConnections() {
+        let _connections = connections.filter(con => {
+            let boolList = [];
+            con.slice(0, 2).forEach(d => {
+                console.log(d);
+                console.log(queue.includes(d));
+                boolList.push(queue.includes(d));
+                
+            }); 
+            return boolList.every(i=>i);
+            
+        });
+        console.log(_connections);
+        console.log(queue);
         gantt.append("g")
             .attr("id", "task-connections")
             .selectAll("path")
-            .data(connections)
+            .data(_connections)
             .enter()
             .append("path")
             .attr("class", "line")
@@ -349,5 +373,9 @@ function afterJSONLoad() {
                 d3.select(this).attr("class", "selected");
             })
     }
-    drawConnections(connections);
+    console.log(connections);
+
+    //execute 
+    render(gantt, hierarchy);
+    drawConnections();
 }
