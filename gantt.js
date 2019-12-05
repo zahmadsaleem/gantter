@@ -138,6 +138,13 @@ function afterJSONLoad() {
             d._children = null;
         }
     }
+    function hasChildren(d) {
+        if (d.children) {
+            return !d.children.length == 0
+        } else {
+            return !d._children.length == 0
+        }
+    }
     function render(grp, node) {
         queue.push(node.data);
         _grp = grp.append("g").datum(node.data);
@@ -146,17 +153,14 @@ function afterJSONLoad() {
             .attr("id", d => "id" + d.ID)
             .attr("x", d => timeScale(d.Start))
             .attr("y", heightScale(index))
-            .attr("width", d => timeScale(d.Finish) - timeScale(d.Start))
+            .attr("width", d => {
+                let _w = timeScale(d.Finish) - timeScale(d.Start);
+                return _w > 10 ? _w : 10;
+            })
             .attr("height", taskht)
             .attr("rx", 2)
             .attr("ry", 2)
-            .attr("class", d => {
-                if (d.children) {
-                    return d.children.length == 0 ? "task-rect" : "task-parent";
-                } else {
-                    return d._children.length == 0 ? "task-rect" : "task-parent";
-                }
-            })
+            .attr("class", d => hasChildren(d) ? "task-parent" : "task-rect")
             .on("click", function (d) {
                 d3.event.stopPropagation();
                 removeSelection();
@@ -177,15 +181,17 @@ function afterJSONLoad() {
                     drawConnections();
                 }
             });
+        //task names
         _grp.append("text")
-            .text(d => d.TaskName)
-            .attr("x", 10)
+            .text(d => hasChildren(d) ? d.TaskName.toUpperCase() : d.TaskName)
+            .attr("x", d=>hasChildren(d) ? timeScale(d.Start) + 10 : 10)
             .attr("y", heightScale(index) + taskht / 2)
             .attr("class", "task");
+        //task IDs
         _grp.append("text")
             .text(d => d.ID)
-            .attr("x", d => timeScale(d.Start))
-            .attr("y", heightScale(index) + taskht)
+            .attr("x", d => timeScale(d.Finish))
+            .attr("y", heightScale(index) + taskht / 2)
             .attr("class", "task");
         index++;
         //on click toggle children
@@ -198,28 +204,11 @@ function afterJSONLoad() {
         }
     }
 
-
-
+    // x scale
     var timeScale = d3.scaleTime()
         .domain([d3.min(data, d => d.Start),
         d3.max(data, d => d.Finish)])
         .range([0, w - 50]);
-
-    // axis
-    var xAxis = d3.axisBottom(timeScale)
-        .ticks(d3.timeWeek)
-        .tickFormat(d3.timeFormat('%d %b'));
-
-    // var grid = svg.append('g')
-    //     .attr('class', 'grid')
-    //     .attr('transform', 'translate(20)')
-    //     .call(xAxis)
-    //     .selectAll("text")
-    //     .style("text-anchor", "middle")
-    //     .attr("fill", "#000")
-    //     .attr("stroke", "none")
-    //     .attr("font-size", 10)
-    //     .attr("dy", "1em");
 
     var heightScale = d3.scaleLinear()
         .domain([1, data.length])
@@ -229,43 +218,6 @@ function afterJSONLoad() {
     gantt = svg.append("g")
         .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
-
-    // group = gantt.append("g")
-    //     // .attr('transform', 'translate(0,25)')
-    //     .attr("id", "task-rectangles")
-    //     .selectAll("g")
-    //     .data(data)
-    //     .enter()
-    //     .append("g")
-    //     .on("click", function (d) {
-    //         d3.event.stopPropagation();
-    //         removeSelection();
-    //         Array.from(document.querySelectorAll("#task-connections path"))
-    //             .filter((k) => k.id.split("_").includes(d.ID))
-    //             .forEach(el => d3.select(el).attr("class", "selected"));
-    //         d3.select("#id" + d.ID).attr("class", "selected");
-    //     });
-
-    // task rectangles
-    // rect = group.append("rect")
-    //     .attr("x", (d) => timeScale(d.Start))
-    //     .attr("y", (d, i) => heightScale(+(d.ID)))
-    //     .attr("width", (d) => timeScale(d.Finish) - timeScale(d.Start))
-    //     .attr("height", taskht)
-    //     .attr("rx", 2)
-    //     .attr("ry", 2)
-    //     .attr("class", "task-rect")
-    //     .attr("id", (d) => "id" + d.ID);
-
-
-    // taask names
-    // group.append("text")
-    //     .text((d) => d.ID)
-    //     .attr("x", (d) => timeScale(d.Start))
-    //     .attr("y", (d) => heightScale(+(d.ID)) + taskht)
-    //     .attr("class", "task");
-
-
 
     var lineGenerator = d3.line()
         .x((d) => d[0])
@@ -328,16 +280,10 @@ function afterJSONLoad() {
         let _connections = connections.filter(con => {
             let boolList = [];
             con.slice(0, 2).forEach(d => {
-                console.log(d);
-                console.log(queue.includes(d));
                 boolList.push(queue.includes(d));
-                
-            }); 
-            return boolList.every(i=>i);
-            
+            });
+            return boolList.every(i => i);
         });
-        console.log(_connections);
-        console.log(queue);
         gantt.append("g")
             .attr("id", "task-connections")
             .selectAll("path")
@@ -373,7 +319,7 @@ function afterJSONLoad() {
                 d3.select(this).attr("class", "selected");
             })
     }
-    console.log(connections);
+    // console.log(connections);
 
     //execute 
     render(gantt, hierarchy);
