@@ -54,3 +54,7 @@ rect.selected {
    stroke: orangered;
    fill: black;
 }
+
+#date-selector:hover{
+  cursor: e-resize;
+}

@@ -50,36 +50,51 @@ d3.json("./schedule.json")
             item.Start = Date.parse(item.Start);
 
             // process dependencies
-            var preArray = [];
-            var _preArray = item.Predecessors.split(";");
-            _preArray.forEach((link) => {
-                var preObject = {};
-                const rePre = /^\d+/g;
-                const reType = /SS|FS|FF|SF/g;
-                const reSign = /\+|-/g;
-                const reAdd = /\d+(?=\sday)/g;
+            if(item.Predecessors){
+                var preArray = [];
+                var _preArray = function(t){
+                    let sc = t.search(/;/);
+                    let c = t.search(/,/);
+                    return sc == -1 ? t.split(","): t.split(";");
+                }(item.Predecessors.replace(/\s/g, ""));
+                // delimiters could be different
+                _preArray.forEach((link) => {
+                    var preObject = {};
+                    const rePre = /^\d+/g;
+                    const reType = /SS|FS|FF|SF/g;
+                    const reSign = /\+|-/g;
+                    const reAdd = /\d+(?=d)/g;
 
-                // eg : "119FS+50 days"
-                var _pre = rePre.exec(link);
-                if (_pre) {
-                    preObject.pre = _pre[0];
-                    var _type = reType.exec(link);
-                    _type ? preObject.type = _type[0] : preObject.type = undefined;
-                    _sign = reSign.exec(link);
-                    if (_sign) {
-                        preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
+                    // eg : "119FS+50 days"
+                    // could be +5d, +5 days
+                    var _pre = rePre.exec(link);
+                    if (_pre) {
+                        preObject.pre = _pre[0];
+                        var _type = reType.exec(link);
+                        _type ? preObject.type = _type[0] : preObject.type = undefined;
+                        _sign = reSign.exec(link);
+                        if (_sign) {
+                            preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
+                        } else {
+                            preObject.addition = 0;
+                        }
+                        connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
                     } else {
+                        preObject.pre = undefined;
+                        preObject.type = undefined;
                         preObject.addition = 0;
                     }
-                    connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
-                } else {
-                    preObject.pre = undefined;
-                    preObject.type = undefined;
-                    preObject.addition = 0;
-                }
-                preArray.push(preObject);
-            });
-            item.preArray = preArray;
+                    preArray.push(preObject);
+
+                    if (arr[+preObject.pre - 1].dependents){
+                        arr[+preObject.pre - 1].dependents.push(item.ID);
+                    } else {
+                        arr[+preObject.pre - 1].dependents = [item.ID];
+                    }
+                    console.log(arr[+preObject.pre - 1]);
+                });
+                item.preArray = preArray;
+            }
 
             // convert indent to parent<>child list
             let _s = item.TaskName.match(/^\s+\w/g);
@@ -208,7 +223,9 @@ function afterJSONLoad() {
     var timeScale = d3.scaleTime()
         .domain([d3.min(data, d => d.Start),
         d3.max(data, d => d.Finish)])
-        .range([0, w - 50]);
+        .range([0, w - 50])
+        .clamp(true);
+
 
     var heightScale = d3.scaleLinear()
         .domain([1, data.length])
@@ -319,7 +336,7 @@ function afterJSONLoad() {
                 d3.select(this).attr("class", "selected");
             })
     }
-    // console.log(connections);
+    console.log(connections);
 
     //execute 
     render(gantt, hierarchy);
@@ -330,21 +347,24 @@ function afterJSONLoad() {
         .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
         .call(d3.drag()
             .on("drag", function () {
+                const range = timeScale.range();
                 let checkMouseX = pos => {
-                    if (pos < timeScale.range()[1] && pos > timeScale.range()[0]) {
-                        dragPosition = pos
+                    if (pos < range[1] && pos > range[0]) {
+                        dragPosition = pos;
                         return pos;
                     } else {
                         return dragPosition;
                     }
                 }
                 d3.select(this)
-                    .attr("d", lineGenerator([[checkMouseX(d3.event.x), 0], [checkMouseX(d3.event.x), h]]));
-                // console.log(timeScale.invert(d3.event.x))
-
+                    .attr("d", () => {
+                        let ptx = checkMouseX(d3.event.x);
+                        return lineGenerator([[ptx, 0], [ptx, h]])
+                    });
             }
-        ));
-    
-    console.log(timeScale.range())
-    
+            ));
+
+    var event = new Event('dataloaded');
+    // document.dispatchEvent(event);
 }
+
