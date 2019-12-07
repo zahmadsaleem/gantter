@@ -32,7 +32,13 @@ path.selected {
 
 .task-rect {
   fill: rebeccapurple;
-  opacity: 0.5;
+  /* opacity: 0.5; */
+}
+.task-actual {
+  fill: chocolate;
+  opacity: 0.8;
+  stroke: rgb(199, 199, 199);
+  stroke-width: 2px;
 }
 
 .task-parent {

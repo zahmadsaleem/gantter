@@ -1,4 +1,4 @@
-var w = 800;
+var w = 2500;
 var h = 5000;
 var taskht = 20;
 
@@ -34,109 +34,217 @@ function getTaskByID(id) {
 }
 
 
-// process data
-d3.json("./schedule.json")
-    .then((d) => {
+function getFuture(d, dependents) {
+    if (!dependents) dependents = [];
+    if (d.dependents.length > 0) {
+        d.dependents.forEach(i => {
+            let j = getTaskByID(i);
+            if (!dependents.includes(j)) {
+                dependents.push(j);
+                getFuture(j, dependents);
+            } else {
+                console.log(`probable loop dependency ${i}`)
+            }
+        });
+        return dependents;
+    } else {
+        return dependents;
+    }
+}
+
+
+function getDepthFirstIndex(root, node) {
+    var gotIt = false;
+    function m(root, node, i) {
+        if (!i) i = 0;
+        var childs = root.children;
+        // console.log(`root= ${root.id} node= ${node.id}`);
+        if (root.id == node.id) {
+            // console.log("got it in the beginning")
+            return i;
+        } else if (childs) {
+            // console.log("going for the kill");
+            for (var c = 0; c < childs.length; c++) {
+                i++;
+                if (childs[c].id == node.id) {
+                    // console.log("got it while killin");
+                    gotIt = true;
+                    return i;
+                } else if (!gotIt) {
+                    // console.log("killin it");
+                    // console.log(gotIt);
+                    i = m(childs[c], node, i);
+                }
+            }
+            return i;
+        } else {
+            // console.log(`not a child ${i}`);
+            return i;
+        }
+    }
+    let r = m(root, node);
+    return r;
+}
+
+function generateDataQueue(root) {
+    var q = [root.data];
+    function m(root, q) {
+        if (root.children) {
+            root.children.forEach((d) => {
+                q.push(d.data);
+                m(d, q);
+            });
+            return q;
+        } else {
+            return q;
+        }
+    }
+    return m(root, q);
+}
+
+// either json or csv
+d3.json("./convertcsv.json")
+    // d3.json("./schedule.json")
+    .then(d => {
         // remove spaces from json keys
         data = JSON.parse(
             JSON.stringify(d)
                 .replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, ""))
         );
-        data.forEach((item, index, arr) => {
-            // convert raw data types
-            let _dur = item.Duration.match(/^\d+/g);
-            item.Duration = _dur ? +_dur[0] : 1;
-            item.Finish = Date.parse(item.Finish);
-            item.Start = Date.parse(item.Start);
-
-            // process dependencies
-            if(item.Predecessors){
-                var preArray = [];
-                var _preArray = function(t){
-                    let sc = t.search(/;/);
-                    let c = t.search(/,/);
-                    return sc == -1 ? t.split(","): t.split(";");
-                }(item.Predecessors.replace(/\s/g, ""));
-                // delimiters could be different
-                _preArray.forEach((link) => {
-                    var preObject = {};
-                    const rePre = /^\d+/g;
-                    const reType = /SS|FS|FF|SF/g;
-                    const reSign = /\+|-/g;
-                    const reAdd = /\d+(?=d)/g;
-
-                    // eg : "119FS+50 days"
-                    // could be +5d, +5 days
-                    var _pre = rePre.exec(link);
-                    if (_pre) {
-                        preObject.pre = _pre[0];
-                        var _type = reType.exec(link);
-                        _type ? preObject.type = _type[0] : preObject.type = undefined;
-                        _sign = reSign.exec(link);
-                        if (_sign) {
-                            preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
-                        } else {
-                            preObject.addition = 0;
-                        }
-                        connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
-                    } else {
-                        preObject.pre = undefined;
-                        preObject.type = undefined;
-                        preObject.addition = 0;
-                    }
-                    preArray.push(preObject);
-
-                    if (arr[+preObject.pre - 1].dependents){
-                        arr[+preObject.pre - 1].dependents.push(item.ID);
-                    } else {
-                        arr[+preObject.pre - 1].dependents = [item.ID];
-                    }
-                    console.log(arr[+preObject.pre - 1]);
-                });
-                item.preArray = preArray;
-            }
-
-            // convert indent to parent<>child list
-            let _s = item.TaskName.match(/^\s+\w/g);
-            _s ? item.indent = _s[0].search(/\S/g) / 4 : item.indent = 0;
-            item.TaskName = item.TaskName.trim()
-            item.children = [];
-            var _parent;
-            if (index > 0) {
-                if (item.indent > arr[index - 1].indent) {
-                    _parent = arr[index - 1].parents.concat(arr[index - 1].ID);
-                    item.parents = _parent;
-                } else {
-                    _parent = arr[index - 1].parents.slice(0, item.indent);
-                    item.parents = _parent;
-                }
-                if (_parent.length > 0) {
-                    arr[_parent.slice(-1)[0] - 1].children.push(item.ID);
-                }
-            } else {
-                item.parents = [];
-            }
-        });
-
-        console.log(data);
-        // console.log(connections);
-
-        afterJSONLoad();
+    }).then(() => {
+        data.forEach(d => d.dependents = []);
+        processProjectData();
     });
 
+
+
+// process data
+function processProjectData() {
+    data.forEach((item, index, arr) => {
+        // convert raw data types
+        let _dur = item.Duration.match(/^\d+/g);
+        item.Duration = _dur ? +_dur[0] : 1;
+        item.Finish = Date.parse(item.Finish);
+        item.Start = Date.parse(item.Start);
+        item.ID = String(item.ID);
+        item.ActualStart = Date.parse(item.ActualStart);
+        item.ActualFinish = Date.parse(item.ActualFinish);
+
+        // process dependencies
+        if (item.Predecessors) {
+            var preArray = [];
+            var _preArray = function (t) {
+                let sc = t.search(/;/);
+                let c = t.search(/,/);
+                return sc == -1 ? t.split(",") : t.split(";");
+            }(item.Predecessors.replace(/\s/g, ""));
+            // delimiters could be different
+            _preArray.forEach((link) => {
+                var preObject = {};
+                const rePre = /^\d+/g;
+                const reType = /SS|FS|FF|SF/g;
+                const reSign = /\+|-/g;
+                const reAdd = /\d+(?=d)/g;
+
+                // eg : "119FS+50 days"
+                // could be +5d, +5 days
+                var _pre = rePre.exec(link);
+                if (_pre) {
+                    preObject.pre = _pre[0];
+                    var _type = reType.exec(link);
+                    _type ? preObject.type = _type[0] : preObject.type = undefined;
+                    _sign = reSign.exec(link);
+                    if (_sign) {
+                        preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
+                    } else {
+                        preObject.addition = 0;
+                    }
+                    connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
+                } else {
+                    preObject.pre = undefined;
+                    preObject.type = undefined;
+                    preObject.addition = 0;
+                }
+                preArray.push(preObject);
+                arr[+preObject.pre - 1].dependents.push(item.ID);
+
+            });
+            item.preArray = preArray;
+        }
+
+        // convert indent to parent<>child list
+        let _s = item.TaskName.match(/^\s+\w/g);
+        _s ? item.indent = _s[0].search(/\S/g) / 4 : item.indent = 0;
+        item.TaskName = item.TaskName.trim()
+        item.children = [];
+        var _parent;
+        if (index > 0) {
+            if (item.indent > arr[index - 1].indent) {
+                _parent = arr[index - 1].parents.concat(arr[index - 1].ID);
+                item.parents = _parent;
+            } else {
+                _parent = arr[index - 1].parents.slice(0, item.indent);
+                item.parents = _parent;
+            }
+            if (_parent.length > 0) {
+                arr[_parent.slice(-1)[0] - 1].children.push(item.ID);
+            }
+        } else {
+            item.parents = [];
+        }
+    });
+
+    console.log(data);
+    // console.log(connections);
+
+    afterProcessData();
+};
+
 // main function after data processing
-function afterJSONLoad() {
+function afterProcessData() {
 
     var stratify = d3.stratify()
         .id(d => d.ID)
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
 
     hierarchy = stratify(data);
-    console.log(hierarchy);
+    hierarchy.each((d)=> d._descendants= d.descendants().slice(1));
+    // console.log(hierarchy);
 
-    var index = 1;
-    var collapsed = [];
-    tree = d3.tree(hierarchy);
+
+    // var collapsed = [];
+
+    // tree = data => {
+    //     const root = d3.hierarchy(data);
+    //     root.dx = 10;
+    //     root.dy = 1500 / (root.height + 1);
+    //     return d3.tree().nodeSize([root.dx, root.dy])(root);
+    // }
+
+    // root = tree(data);
+
+    // let x0 = Infinity;
+    // let x1 = -x0;
+    // root.each(d => {
+    //   if (d.x > x1) x1 = d.x;
+    //   if (d.x < x0) x0 = d.x;
+    // });
+    // const g = svg.append("g")
+    //     .attr("font-family", "sans-serif")
+    //     .attr("font-size", 10)
+    //     .attr("transform", `translate(${root.dy / 3},${root.dx - x0})`);
+    // const node = g.append("g")
+    //     .attr("stroke-linejoin", "round")
+    //     .attr("stroke-width", 3)
+    //     .selectAll("g")
+    //     .data(root.descendants())
+    //     .join("g")
+    //     .attr("transform", d => `translate(${d.y},${d.x})`);
+
+    // node.append("circle")
+    //     .attr("fill", d => d.children ? "#555" : "#999")
+    //     .attr("r", 2.5);
+
 
     /* 
     HACK : This is temporary, 
@@ -160,8 +268,9 @@ function afterJSONLoad() {
             return !d._children.length == 0
         }
     }
+
+    var index = 1;
     function render(grp, node) {
-        queue.push(node.data);
         _grp = grp.append("g").datum(node.data);
         //append to group
         _grp.append("rect")
@@ -175,6 +284,7 @@ function afterJSONLoad() {
             .attr("height", taskht)
             .attr("rx", 2)
             .attr("ry", 2)
+            .attr("opacity", 0.5)
             .attr("class", d => hasChildren(d) ? "task-parent" : "task-rect")
             .on("click", function (d) {
                 d3.event.stopPropagation();
@@ -186,16 +296,24 @@ function afterJSONLoad() {
             })
             .on("dblclick", function (d) {
                 if (d.children) {
-                    queue = [];
-                    index = 1;
-                    gantt.selectAll("rect").remove()
-                    gantt.selectAll("text").remove()
-                    gantt.selectAll("#task-connections").remove()
-                    toggleChildren(node);
-                    render(gantt, hierarchy);
-                    drawConnections();
+                    updateNodes(node);
                 }
             });
+
+        // actual gantt
+        _grp.append("rect")
+            .attr("id", d => "progress" + d.ID)
+            .attr("x", d => timeScale(d.ActualStart))
+            .attr("y", heightScale(index) + taskht / 3)
+            .attr("width", d => {
+                let _w = timeScale(d.ActualFinish) - timeScale(d.ActualStart);
+                return _w > 10 ? _w : 10;
+            })
+            .attr("height", taskht / 2)
+            .attr("class", "task-actual")
+            .attr("rx", 2)
+            .attr("ry", 2);
+
         //task names
         _grp.append("text")
             .text(d => hasChildren(d) ? d.TaskName.toUpperCase() : d.TaskName)
@@ -219,12 +337,50 @@ function afterJSONLoad() {
         }
     }
 
+    function updateNodes(node) {
+        // get node index
+        gantt.selectAll("#task-connections").remove()
+        // HACK instead generate dfs queue
+        // let index = getDepthFirstIndex(hierarchy,node); 
+        let descendents = node._descendants;
+        let index = queue.indexOf(node.data);
+        console.log(index);
+        var childs = node.children;
+        var _childs = node._children;
+        toggleChildren(node);
+        queue = generateDataQueue(hierarchy);
+        if (childs) {
+            descendents.map((d) => {
+                let nodedata = d.data;
+                d3.select("#id" + nodedata.ID)
+                    .transition()
+                    .duration(1000)
+                    .attr("y", heightScale(index + 1))
+                    .attr("opacity", 0)
+                    .attr("display", function () { setTimeout(() => this.setAttribute("display", "none"), 1000) });
+            });
+        } else {
+            descendents.map((d) => {
+                let nodedata = d.data;
+                d3.select("#id" + nodedata.ID)
+                    .transition()
+                    .duration(1000)
+                    .attr("y", heightScale(queue.indexOf(nodedata) + 1))
+                    .attr("opacity", 0.5)
+                    .attr("display", function () { this.removeAttribute("display") });
+            });
+        }
+
+        drawConnections();
+    }
+
     // x scale
     var timeScale = d3.scaleTime()
         .domain([d3.min(data, d => d.Start),
         d3.max(data, d => d.Finish)])
-        .range([0, w - 50])
-        .clamp(true);
+        .range([0, 800]);
+    // .range([0, w - 50]);
+    // .clamp(true);
 
 
     var heightScale = d3.scaleLinear()
@@ -339,8 +495,11 @@ function afterJSONLoad() {
     console.log(connections);
 
     //execute 
+    queue = generateDataQueue(hierarchy);
     render(gantt, hierarchy);
     drawConnections();
+
+    // time slider
     var dragPosition = d3.mean(timeScale.range());
     gantt.append("path")
         .attr("id", "date-selector")
@@ -366,5 +525,6 @@ function afterJSONLoad() {
 
     var event = new Event('dataloaded');
     // document.dispatchEvent(event);
+
 }
 

@@ -1,0 +1,2162 @@
+[
+ {
+   "ID": 1,
+   "Task Name": "Prestige Central - Project Schedule - Revised on 7th March",
+   "Duration": "138 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Sat 6/22/19",
+   "Predecessors": "",
+   "Actual Start": "1/14/2019",
+   "Actual Finish": "9/5/2019"
+ },
+ {
+   "ID": 2,
+   "Task Name": "    Milestones",
+   "Duration": "138 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Sat 6/22/19",
+   "Predecessors": "",
+   "Actual Start": "1/14/2019",
+   "Actual Finish": "9/5/2019"
+ },
+ {
+   "ID": 3,
+   "Task Name": "        Kick off Meeting",
+   "Duration": "1 day",
+   "Start": " Mon 1/14/19",
+   "Finish": " Mon 1/14/19",
+   "Predecessors": "",
+   "Actual Start": "1/14/2019",
+   "Actual Finish": "1/14/2019"
+ },
+ {
+   "ID": 4,
+   "Task Name": "        Demolition",
+   "Duration": "8 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Tue 2/19/19",
+   "Predecessors": "189",
+   "Actual Start": "6/11/2019",
+   "Actual Finish": "6/19/2019"
+ },
+ {
+   "ID": 5,
+   "Task Name": "        Digital Layout",
+   "Duration": "4 days",
+   "Start": " Tue 1/15/19",
+   "Finish": " Fri 1/18/19",
+   "Predecessors": "",
+   "Actual Start": "1/15/2019",
+   "Actual Finish": "1/18/2019"
+ },
+ {
+   "ID": 6,
+   "Task Name": "        Permit - Demo",
+   "Duration": "1 day",
+   "Start": " Mon 1/21/19",
+   "Finish": " Mon 1/21/19",
+   "Predecessors": "",
+   "Actual Start": "1/21/2019",
+   "Actual Finish": "1/21/2019"
+ },
+ {
+   "ID": 7,
+   "Task Name": "        Permit - Construction",
+   "Duration": "1 day",
+   "Start": " Mon 1/21/19",
+   "Finish": " Mon 1/21/19",
+   "Predecessors": "",
+   "Actual Start": "1/21/2019",
+   "Actual Finish": "1/21/2019"
+ },
+ {
+   "ID": 8,
+   "Task Name": "        Permit - Systems",
+   "Duration": "1 day",
+   "Start": " Mon 1/21/19",
+   "Finish": " Mon 1/21/19",
+   "Predecessors": "",
+   "Actual Start": "1/21/2019",
+   "Actual Finish": "1/21/2019"
+ },
+ {
+   "ID": 9,
+   "Task Name": "        Sample Approvals",
+   "Duration": "33 days",
+   "Start": " Tue 1/15/19",
+   "Finish": " Fri 3/01/19",
+   "Predecessors": "",
+   "Actual Start": "1/15/2019",
+   "Actual Finish": "2/21/2019"
+ },
+ {
+   "ID": 10,
+   "Task Name": "        New Internal Staricase Handover",
+   "Duration": "65 days",
+   "Start": " Thu 2/28/19",
+   "Finish": " Tue 5/14/19",
+   "Predecessors": "",
+   "Actual Start": "2/28/2019",
+   "Actual Finish": "5/14/2019"
+ },
+ {
+   "ID": 11,
+   "Task Name": "        Systems Rough Inspection (Above-Ceiling)",
+   "Duration": "1 day",
+   "Start": " Sat 6/01/19",
+   "Finish": " Sat 6/01/19",
+   "Predecessors": "49",
+   "Actual Start": "8/12/2019",
+   "Actual Finish": "8/12/2019"
+ },
+ {
+   "ID": 12,
+   "Task Name": "        Systems Rough Inspection (In-Wall)",
+   "Duration": "1 day",
+   "Start": " Mon 6/03/19",
+   "Finish": " Mon 6/03/19",
+   "Predecessors": "11",
+   "Actual Start": "8/13/2019",
+   "Actual Finish": "8/13/2019"
+ },
+ {
+   "ID": 13,
+   "Task Name": "        Systems Functional",
+   "Duration": "7 days",
+   "Start": " Tue 6/04/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "12",
+   "Actual Start": "8/14/2019",
+   "Actual Finish": "8/21/2019"
+ },
+ {
+   "ID": 14,
+   "Task Name": "        Systems Final Inspection",
+   "Duration": "1 day",
+   "Start": " Mon 6/10/19",
+   "Finish": " Mon 6/10/19",
+   "Predecessors": "13SS+5 days",
+   "Actual Start": "8/20/2019",
+   "Actual Finish": "8/20/2019"
+ },
+ {
+   "ID": 15,
+   "Task Name": "        Communications Test",
+   "Duration": "1 day",
+   "Start": " Mon 6/10/19",
+   "Finish": " Mon 6/10/19",
+   "Predecessors": "14SS",
+   "Actual Start": "8/20/2019",
+   "Actual Finish": "8/22/2019"
+ },
+ {
+   "ID": 16,
+   "Task Name": "        Hydrostatic Testing",
+   "Duration": "7 days",
+   "Start": " Fri 5/17/19",
+   "Finish": " Fri 5/24/19",
+   "Predecessors": "105",
+   "Actual Start": "5/22/2019",
+   "Actual Finish": "5/29/2019"
+ },
+ {
+   "ID": 17,
+   "Task Name": "        Fire Alarm Pre-Test",
+   "Duration": "7 days",
+   "Start": " Mon 6/03/19",
+   "Finish": " Mon 6/10/19",
+   "Predecessors": "73",
+   "Actual Start": "8/9/2019",
+   "Actual Finish": "8/16/2019"
+ },
+ {
+   "ID": 18,
+   "Task Name": "        Balancing",
+   "Duration": "10 days",
+   "Start": " Tue 6/11/19",
+   "Finish": " Fri 6/21/19",
+   "Predecessors": "14",
+   "Actual Start": "8/21/2019",
+   "Actual Finish": "8/31/2019"
+ },
+ {
+   "ID": 19,
+   "Task Name": "        Commissioning",
+   "Duration": "7 days",
+   "Start": " Tue 6/11/19",
+   "Finish": " Tue 6/18/19",
+   "Predecessors": "17;12;15;214",
+   "Actual Start": "8/23/2019",
+   "Actual Finish": "8/30/2019"
+ },
+ {
+   "ID": 20,
+   "Task Name": "        Fire Alarm Final Inspection",
+   "Duration": "3 days",
+   "Start": " Tue 6/11/19",
+   "Finish": " Thu 6/13/19",
+   "Predecessors": "17",
+   "Actual Start": "8/17/2019",
+   "Actual Finish": "8/20/2019"
+ },
+ {
+   "ID": 21,
+   "Task Name": "        Final Clean",
+   "Duration": "7 days",
+   "Start": " Sat 6/01/19",
+   "Finish": " Sat 6/08/19",
+   "Predecessors": "174",
+   "Actual Start": "8/8/2019",
+   "Actual Finish": "9/5/2019"
+ },
+ {
+   "ID": 22,
+   "Task Name": "        Practical Hadover",
+   "Duration": "1 day",
+   "Start": " Fri 6/21/19",
+   "Finish": " Fri 6/21/19",
+   "Predecessors": "216SS",
+   "Actual Start": "8/24/2019",
+   "Actual Finish": "8/24/2019"
+ },
+ {
+   "ID": 23,
+   "Task Name": "        Punch List",
+   "Duration": "7 days",
+   "Start": " Fri 6/14/19",
+   "Finish": " Fri 6/21/19",
+   "Predecessors": "22FS--7 days",
+   "Actual Start": "8/17/2019",
+   "Actual Finish": "8/24/2019"
+ },
+ {
+   "ID": 24,
+   "Task Name": "        Facility & Community On boarding",
+   "Duration": "7 days",
+   "Start": " Fri 6/14/19",
+   "Finish": " Fri 6/21/19",
+   "Predecessors": "22FS--7 days",
+   "Actual Start": "8/17/2019",
+   "Actual Finish": "8/24/2019"
+ },
+ {
+   "ID": 25,
+   "Task Name": "        Community Handover",
+   "Duration": "1 day",
+   "Start": " Sat 6/22/19",
+   "Finish": " Sat 6/22/19",
+   "Predecessors": "22",
+   "Actual Start": "8/26/2019",
+   "Actual Finish": "8/26/2019"
+ },
+ {
+   "ID": 26,
+   "Task Name": "        Soft Opening",
+   "Duration": "1 day",
+   "Start": " Sat 6/22/19",
+   "Finish": " Sat 6/22/19",
+   "Predecessors": "22",
+   "Actual Start": "8/26/2019",
+   "Actual Finish": "8/26/2019"
+ },
+ {
+   "ID": 27,
+   "Task Name": "        Opening for Members",
+   "Duration": "1 day",
+   "Start": " Sat 6/22/19",
+   "Finish": " Sat 6/22/19",
+   "Predecessors": "22",
+   "Actual Start": "8/26/2019",
+   "Actual Finish": "8/26/2019"
+ },
+ {
+   "ID": 28,
+   "Task Name": "    Long Lead Deliveries - Critical",
+   "Duration": "89 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Wed 6/05/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "6/5/2019"
+ },
+ {
+   "ID": 29,
+   "Task Name": "        Bare Tiles & laminated tiles",
+   "Duration": "15 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/13/19",
+   "Predecessors": "43",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "4/13/2019"
+ },
+ {
+   "ID": 30,
+   "Task Name": "        Wooden Flooring",
+   "Duration": "21 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/20/19",
+   "Predecessors": "29SS",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 31,
+   "Task Name": "        JEB Partition Framework",
+   "Duration": "10 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Mon 4/08/19",
+   "Predecessors": "44",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "4/8/2019"
+ },
+ {
+   "ID": 32,
+   "Task Name": "        Turnstile",
+   "Duration": "60 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Wed 6/05/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "6/5/2019"
+ },
+ {
+   "ID": 33,
+   "Task Name": "        Light Fittings",
+   "Duration": "30 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Wed 5/01/19",
+   "Predecessors": "45",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/1/2019"
+ },
+ {
+   "ID": 34,
+   "Task Name": "        Restroom Tiles",
+   "Duration": "45 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/28/2019"
+ },
+ {
+   "ID": 35,
+   "Task Name": "        Warwick Fabric",
+   "Duration": "30 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Wed 5/01/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/10/2019"
+ },
+ {
+   "ID": 36,
+   "Task Name": "        Acoustic Felt Panels",
+   "Duration": "40 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Sat 5/11/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/22/2019"
+ },
+ {
+   "ID": 37,
+   "Task Name": "        Sisal Carpets",
+   "Duration": "40 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Sat 5/11/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/22/2019"
+ },
+ {
+   "ID": 38,
+   "Task Name": "        Brick Jali",
+   "Duration": "35 days",
+   "Start": " Wed 3/27/19",
+   "Finish": " Mon 5/06/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "5/6/2019"
+ },
+ {
+   "ID": 39,
+   "Task Name": "    Procurement",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "4/6/2019"
+ },
+ {
+   "ID": 40,
+   "Task Name": "        PO for GC Package",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "4/5/2019"
+ },
+ {
+   "ID": 41,
+   "Task Name": "        PO for HVAC Package",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "3/27/2019"
+ },
+ {
+   "ID": 42,
+   "Task Name": "        PO for ICT Packages",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "3/27/2019"
+ },
+ {
+   "ID": 43,
+   "Task Name": "        PO for False Flooring",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "3/27/2019"
+ },
+ {
+   "ID": 44,
+   "Task Name": "        PO for S&I of JEB Partitions",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "3/27/2019"
+ },
+ {
+   "ID": 45,
+   "Task Name": "        PO for Light Fittings",
+   "Duration": "1 day",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "3/27/2019"
+ },
+ {
+   "ID": 46,
+   "Task Name": "        PO for UPS and Batteries",
+   "Duration": "0 days",
+   "Start": " Wed 3/27/19",
+   "Finish": " Wed 3/27/19",
+   "Predecessors": "",
+   "Actual Start": "3/27/2019",
+   "Actual Finish": "4/6/2019"
+ },
+ {
+   "ID": 47,
+   "Task Name": "    Construction",
+   "Duration": "136 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "",
+   "Actual Start": "2/22/2019",
+   "Actual Finish": "8/23/2019"
+ },
+ {
+   "ID": 48,
+   "Task Name": "        Systems",
+   "Duration": "86 days",
+   "Start": " Wed 3/13/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "8/16/2019"
+ },
+ {
+   "ID": 49,
+   "Task Name": "            Electrical (Rough)",
+   "Duration": "56 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "8/10/2019"
+ },
+ {
+   "ID": 50,
+   "Task Name": "                Approval of shop drawings, Material sample board, Cable Schedule",
+   "Duration": "1 day",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 3/28/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "4/6/2019"
+ },
+ {
+   "ID": 51,
+   "Task Name": "                Delivery of Raceways, Conduits & Wires",
+   "Duration": "1 day",
+   "Start": " Fri 3/29/19",
+   "Finish": " Fri 3/29/19",
+   "Predecessors": "50",
+   "Actual Start": "4/8/2019",
+   "Actual Finish": "4/8/2019"
+ },
+ {
+   "ID": 52,
+   "Task Name": "                Delivery of Cables, Cable trays etc",
+   "Duration": "20 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Fri 4/19/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "4/27/2019"
+ },
+ {
+   "ID": 53,
+   "Task Name": "                GA  drawing submission and approval.",
+   "Duration": "4 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Mon 4/01/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 54,
+   "Task Name": "                Delivery of Panels and DB's",
+   "Duration": "30 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Mon 5/06/19",
+   "Predecessors": "53",
+   "Actual Start": "5/4/2019",
+   "Actual Finish": "7/4/2019"
+ },
+ {
+   "ID": 55,
+   "Task Name": "                Marking and drilling for Celing Raceway & Conduit",
+   "Duration": "15 days",
+   "Start": " Fri 3/29/19",
+   "Finish": " Mon 4/15/19",
+   "Predecessors": "50",
+   "Actual Start": "4/8/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 56,
+   "Task Name": "                Raceways fixing on floor for data,AV,ACS & electrical",
+   "Duration": "15 days",
+   "Start": " Sat 3/30/19",
+   "Finish": " Tue 4/16/19",
+   "Predecessors": "51",
+   "Actual Start": "4/9/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 57,
+   "Task Name": "                Raceways fixing on ceiling for data,AV,ACS & electrical",
+   "Duration": "15 days",
+   "Start": " Sat 3/30/19",
+   "Finish": " Tue 4/16/19",
+   "Predecessors": "51;50",
+   "Actual Start": "4/9/2019",
+   "Actual Finish": "5/15/2019"
+ },
+ {
+   "ID": 58,
+   "Task Name": "                Conduits fixing on ceiling /partitions for electrical, Networking",
+   "Duration": "10 days",
+   "Start": " Sat 3/30/19",
+   "Finish": " Wed 4/10/19",
+   "Predecessors": "50;51",
+   "Actual Start": "4/9/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 59,
+   "Task Name": "                Wiring & Cabling works at Ceiling and floor",
+   "Duration": "10 days",
+   "Start": " Thu 4/04/19",
+   "Finish": " Mon 4/15/19",
+   "Predecessors": "56SS+4 days;57SS+4 days;58SS+4 days",
+   "Actual Start": "4/13/2019",
+   "Actual Finish": "4/24/2019"
+ },
+ {
+   "ID": 60,
+   "Task Name": "                Installation of Power Recepticals and termination of cables",
+   "Duration": "7 days",
+   "Start": " Mon 5/06/19",
+   "Finish": " Mon 5/13/19",
+   "Predecessors": "51;152",
+   "Actual Start": "5/18/2019",
+   "Actual Finish": "5/31/2019"
+ },
+ {
+   "ID": 61,
+   "Task Name": "                Installation of Electrical Panels",
+   "Duration": "4 days",
+   "Start": " Tue 5/07/19",
+   "Finish": " Fri 5/10/19",
+   "Predecessors": "54",
+   "Actual Start": "7/5/2019",
+   "Actual Finish": "7/9/2019"
+ },
+ {
+   "ID": 62,
+   "Task Name": "                Installation of Distribution Boards",
+   "Duration": "7 days",
+   "Start": " Tue 5/07/19",
+   "Finish": " Tue 5/14/19",
+   "Predecessors": "54",
+   "Actual Start": "7/5/2019",
+   "Actual Finish": "7/12/2019"
+ },
+ {
+   "ID": 63,
+   "Task Name": "                Installation of Light Fixtures",
+   "Duration": "10 days",
+   "Start": " Thu 5/02/19",
+   "Finish": " Mon 5/13/19",
+   "Predecessors": "33",
+   "Actual Start": "5/2/2019",
+   "Actual Finish": "5/13/2019"
+ },
+ {
+   "ID": 64,
+   "Task Name": "                Termination of wires/ cables on Panels/ DB's",
+   "Duration": "10 days",
+   "Start": " Wed 5/08/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "61SS+1 day;62SS+1 day",
+   "Actual Start": "7/6/2019",
+   "Actual Finish": "7/17/2019"
+ },
+ {
+   "ID": 65,
+   "Task Name": "                Testing and Commissioning of Panels & DB's",
+   "Duration": "4 days",
+   "Start": " Mon 5/20/19",
+   "Finish": " Thu 5/23/19",
+   "Predecessors": "64",
+   "Actual Start": "7/18/2019",
+   "Actual Finish": "8/2/2019"
+ },
+ {
+   "ID": 66,
+   "Task Name": "                Testing of Light fixtures",
+   "Duration": "2 days",
+   "Start": " Wed 5/15/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "63;62",
+   "Actual Start": "7/13/2019",
+   "Actual Finish": "8/1/2019"
+ },
+ {
+   "ID": 67,
+   "Task Name": "                UPS & RP Sockets testing",
+   "Duration": "7 days",
+   "Start": " Fri 5/24/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "65",
+   "Actual Start": "8/3/2019",
+   "Actual Finish": "8/10/2019"
+ },
+ {
+   "ID": 68,
+   "Task Name": "            UPS & BATTERIES",
+   "Duration": "45 days",
+   "Start": " Wed 3/27/19",
+   "Finish": " Fri 5/17/19",
+   "Predecessors": "",
+   "Actual Start": "4/8/2019",
+   "Actual Finish": "6/5/2019"
+ },
+ {
+   "ID": 69,
+   "Task Name": "                Approval of shop drawings and technical submittals",
+   "Duration": "5 days",
+   "Start": " Wed 3/27/19",
+   "Finish": " Mon 4/01/19",
+   "Predecessors": "46",
+   "Actual Start": "4/8/2019",
+   "Actual Finish": "4/12/2019"
+ },
+ {
+   "ID": 70,
+   "Task Name": "                Delivery of UPS, Batteries, Isolation transformer, stands, battery links and cables",
+   "Duration": "35 days",
+   "Start": " Wed 3/27/19",
+   "Finish": " Mon 5/06/19",
+   "Predecessors": "46",
+   "Actual Start": "4/8/2019",
+   "Actual Finish": "5/17/2019"
+ },
+ {
+   "ID": 71,
+   "Task Name": "                Installation of UPS & Batteries",
+   "Duration": "7 days",
+   "Start": " Tue 5/07/19",
+   "Finish": " Tue 5/14/19",
+   "Predecessors": "70",
+   "Actual Start": "5/18/2019",
+   "Actual Finish": "6/1/2019"
+ },
+ {
+   "ID": 72,
+   "Task Name": "                Testing and commissioning of UPS & Batteries (Including Battery Back up Test )",
+   "Duration": "3 days",
+   "Start": " Wed 5/15/19",
+   "Finish": " Fri 5/17/19",
+   "Predecessors": "71",
+   "Actual Start": "6/3/2019",
+   "Actual Finish": "6/5/2019"
+ },
+ {
+   "ID": 73,
+   "Task Name": "            FAPA Works",
+   "Duration": "57 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 6/01/19",
+   "Predecessors": "42",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "8/8/2019"
+ },
+ {
+   "ID": 74,
+   "Task Name": "                Delivery to site - Conduits, Cables, pipes and asseceires",
+   "Duration": "10 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Mon 4/08/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "4/17/2019"
+ },
+ {
+   "ID": 75,
+   "Task Name": "                Delivery to site - fire alarm panel, Detectors modules, Speakers",
+   "Duration": "25 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 4/25/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 76,
+   "Task Name": "                Delivery of rack, amplifier and PA system",
+   "Duration": "15 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/13/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "4/23/2019"
+ },
+ {
+   "ID": 77,
+   "Task Name": "                Cabling works on ceiling",
+   "Duration": "15 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Thu 4/18/19",
+   "Predecessors": "74SS+4 days",
+   "Actual Start": "4/11/2019",
+   "Actual Finish": "5/14/2019"
+ },
+ {
+   "ID": 78,
+   "Task Name": "                Fixing of FAS devices on True ceiling & False Celing",
+   "Duration": "10 days",
+   "Start": " Wed 4/10/19",
+   "Finish": " Sat 4/20/19",
+   "Predecessors": "77SS+7 days",
+   "Actual Start": "4/19/2019",
+   "Actual Finish": "4/30/2019"
+ },
+ {
+   "ID": 79,
+   "Task Name": "                Fixing of FAS panel",
+   "Duration": "4 days",
+   "Start": " Fri 4/26/19",
+   "Finish": " Tue 4/30/19",
+   "Predecessors": "75",
+   "Actual Start": "5/6/2019",
+   "Actual Finish": "5/9/2019"
+ },
+ {
+   "ID": 80,
+   "Task Name": "                Fixing of Amplifier for PA system",
+   "Duration": "2 days",
+   "Start": " Mon 4/15/19",
+   "Finish": " Tue 4/16/19",
+   "Predecessors": "76",
+   "Actual Start": "4/24/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 81,
+   "Task Name": "                Installation of speakers on ceiling",
+   "Duration": "4 days",
+   "Start": " Fri 4/26/19",
+   "Finish": " Tue 4/30/19",
+   "Predecessors": "75",
+   "Actual Start": "5/6/2019",
+   "Actual Finish": "5/9/2019"
+ },
+ {
+   "ID": 82,
+   "Task Name": "                Testing & commissioning of PA system",
+   "Duration": "2 days",
+   "Start": " Wed 4/17/19",
+   "Finish": " Thu 4/18/19",
+   "Predecessors": "80",
+   "Actual Start": "5/6/2019",
+   "Actual Finish": "5/7/2019"
+ },
+ {
+   "ID": 83,
+   "Task Name": "                Testing & commissioning of FAS equipment",
+   "Duration": "2 days",
+   "Start": " Wed 4/17/19",
+   "Finish": " Thu 4/18/19",
+   "Predecessors": "80",
+   "Actual Start": "5/6/2019",
+   "Actual Finish": "5/7/2019"
+ },
+ {
+   "ID": 84,
+   "Task Name": "                Fixing of Safety Signage's",
+   "Duration": "1 day",
+   "Start": " Sat 6/01/19",
+   "Finish": " Sat 6/01/19",
+   "Predecessors": "174",
+   "Actual Start": "8/8/2019",
+   "Actual Finish": "8/8/2019"
+ },
+ {
+   "ID": 85,
+   "Task Name": "                Fixing of Evacuation Plans",
+   "Duration": "1 day",
+   "Start": " Sat 6/01/19",
+   "Finish": " Sat 6/01/19",
+   "Predecessors": "174",
+   "Actual Start": "8/8/2019",
+   "Actual Finish": "8/8/2019"
+ },
+ {
+   "ID": 86,
+   "Task Name": "                Installation of portable Fire Extinguishers",
+   "Duration": "1 day",
+   "Start": " Sat 6/01/19",
+   "Finish": " Sat 6/01/19",
+   "Predecessors": "174",
+   "Actual Start": "8/8/2019",
+   "Actual Finish": "8/8/2019"
+ },
+ {
+   "ID": 87,
+   "Task Name": "            HVAC (Rough)",
+   "Duration": "51 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 5/25/19",
+   "Predecessors": "",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "8/5/2019"
+ },
+ {
+   "ID": 88,
+   "Task Name": "                Shop drawing approval",
+   "Duration": "4 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Mon 4/01/19",
+   "Predecessors": "41",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "4/1/2019"
+ },
+ {
+   "ID": 89,
+   "Task Name": "                Delivery of Ducts, insulation, pipes and accessories",
+   "Duration": "10 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Fri 4/12/19",
+   "Predecessors": "88",
+   "Actual Start": "4/2/2019",
+   "Actual Finish": "5/2/2019"
+ },
+ {
+   "ID": 90,
+   "Task Name": "                Delivery of Fire dampers, RA Ducts, CTU etc",
+   "Duration": "28 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Fri 5/03/19",
+   "Predecessors": "88",
+   "Actual Start": "4/2/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 91,
+   "Task Name": "                Delivery of VAV, Butterfly valves, Grills Diffusers, etc",
+   "Duration": "28 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Fri 5/03/19",
+   "Predecessors": "88",
+   "Actual Start": "4/2/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 92,
+   "Task Name": "                Delivery of AHU and CSU",
+   "Duration": "35 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Sat 5/11/19",
+   "Predecessors": "88",
+   "Actual Start": "4/2/2019",
+   "Actual Finish": "5/11/2019"
+ },
+ {
+   "ID": 93,
+   "Task Name": "                Delivery of DX / VRF Indoor & Out door units",
+   "Duration": "15 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Thu 4/18/19",
+   "Predecessors": "88",
+   "Actual Start": "4/2/2019",
+   "Actual Finish": "5/23/2019"
+ },
+ {
+   "ID": 94,
+   "Task Name": "                Marking and Drilling of Ducts, Trays & Piping",
+   "Duration": "6 days",
+   "Start": " Tue 4/02/19",
+   "Finish": " Mon 4/08/19",
+   "Predecessors": "88",
+   "Actual Start": "4/2/2019",
+   "Actual Finish": "5/30/2019"
+ },
+ {
+   "ID": 95,
+   "Task Name": "                Installation of Ducts, Trays & Piping",
+   "Duration": "20 days",
+   "Start": " Mon 4/08/19",
+   "Finish": " Tue 4/30/19",
+   "Predecessors": "89SS+5 days",
+   "Actual Start": "4/8/2019",
+   "Actual Finish": "4/30/2019"
+ },
+ {
+   "ID": 96,
+   "Task Name": "                Installation of Fire damper, RA Ducts, CTU Etc",
+   "Duration": "7 days",
+   "Start": " Sat 5/04/19",
+   "Finish": " Sat 5/11/19",
+   "Predecessors": "90",
+   "Actual Start": "5/4/2019",
+   "Actual Finish": "6/20/2019"
+ },
+ {
+   "ID": 97,
+   "Task Name": "                Installation of Butterfly valve, Grills, diffusers, etc",
+   "Duration": "15 days",
+   "Start": " Mon 4/22/19",
+   "Finish": " Wed 5/08/19",
+   "Predecessors": "95SS+12 days",
+   "Actual Start": "4/22/2019",
+   "Actual Finish": "5/8/2019"
+ },
+ {
+   "ID": 98,
+   "Task Name": "                Installation of AHU and CSU",
+   "Duration": "10 days",
+   "Start": " Mon 5/13/19",
+   "Finish": " Thu 5/23/19",
+   "Predecessors": "92",
+   "Actual Start": "5/13/2019",
+   "Actual Finish": "5/23/2019"
+ },
+ {
+   "ID": 99,
+   "Task Name": "                Installation of Copper Piping and MS pipes",
+   "Duration": "15 days",
+   "Start": " Sat 4/13/19",
+   "Finish": " Tue 4/30/19",
+   "Predecessors": "88;89",
+   "Actual Start": "5/3/2019",
+   "Actual Finish": "5/20/2019"
+ },
+ {
+   "ID": 100,
+   "Task Name": "                Pressure testing of pipes",
+   "Duration": "6 days",
+   "Start": " Mon 5/20/19",
+   "Finish": " Sat 5/25/19",
+   "Predecessors": "98SS+6 days",
+   "Actual Start": "5/20/2019",
+   "Actual Finish": "5/25/2019"
+ },
+ {
+   "ID": 101,
+   "Task Name": "                Installation of DX / VRF Out Door Units",
+   "Duration": "5 days",
+   "Start": " Fri 4/19/19",
+   "Finish": " Wed 4/24/19",
+   "Predecessors": "93",
+   "Actual Start": "5/24/2019",
+   "Actual Finish": "5/29/2019"
+ },
+ {
+   "ID": 102,
+   "Task Name": "                Installation of DX / VRF Indoor Units",
+   "Duration": "4 days",
+   "Start": " Fri 4/19/19",
+   "Finish": " Tue 4/23/19",
+   "Predecessors": "93",
+   "Actual Start": "5/24/2019",
+   "Actual Finish": "5/28/2019"
+ },
+ {
+   "ID": 103,
+   "Task Name": "                Installation of VAV & controllers",
+   "Duration": "12 days",
+   "Start": " Sat 5/04/19",
+   "Finish": " Fri 5/17/19",
+   "Predecessors": "91",
+   "Actual Start": "5/4/2019",
+   "Actual Finish": "5/17/2019"
+ },
+ {
+   "ID": 104,
+   "Task Name": "                Testing and commissioning",
+   "Duration": "2 days",
+   "Start": " Fri 5/24/19",
+   "Finish": " Sat 5/25/19",
+   "Predecessors": "95;96;97;98;99;101;102;103;65",
+   "Actual Start": "8/3/2019",
+   "Actual Finish": "8/5/2019"
+ },
+ {
+   "ID": 105,
+   "Task Name": "            FPS Works",
+   "Duration": "43 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "40",
+   "Actual Start": "3/30/2019",
+   "Actual Finish": "5/21/2019"
+ },
+ {
+   "ID": 106,
+   "Task Name": "                Shop Drawing approval",
+   "Duration": "7 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 4/04/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 107,
+   "Task Name": "                Delivery of Pipes and Accessories",
+   "Duration": "15 days",
+   "Start": " Fri 4/05/19",
+   "Finish": " Mon 4/22/19",
+   "Predecessors": "106",
+   "Actual Start": "5/4/2019",
+   "Actual Finish": "5/21/2019"
+ },
+ {
+   "ID": 108,
+   "Task Name": "                Installation of Pipes and Accessories",
+   "Duration": "35 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Tue 5/07/19",
+   "Predecessors": "107FF--10 days",
+   "Actual Start": "3/30/2019",
+   "Actual Finish": "5/9/2019"
+ },
+ {
+   "ID": 109,
+   "Task Name": "                Pressure testing",
+   "Duration": "6 days",
+   "Start": " Wed 5/08/19",
+   "Finish": " Tue 5/14/19",
+   "Predecessors": "108",
+   "Actual Start": "5/10/2019",
+   "Actual Finish": "5/16/2019"
+ },
+ {
+   "ID": 110,
+   "Task Name": "                Commissioning of system",
+   "Duration": "2 days",
+   "Start": " Wed 5/15/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "109",
+   "Actual Start": "5/17/2019",
+   "Actual Finish": "5/18/2019"
+ },
+ {
+   "ID": 111,
+   "Task Name": "            Plumbing (Rough)",
+   "Duration": "27 days",
+   "Start": " Wed 3/13/19",
+   "Finish": " Fri 4/12/19",
+   "Predecessors": "194FF",
+   "Actual Start": "7/17/2019",
+   "Actual Finish": "8/16/2019"
+ },
+ {
+   "ID": 112,
+   "Task Name": "            Plumbing Fixtures",
+   "Duration": "15 days",
+   "Start": " Tue 6/04/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "198FF",
+   "Actual Start": "6/13/2019",
+   "Actual Finish": "6/29/2019"
+ },
+ {
+   "ID": 113,
+   "Task Name": "            Plumbing Equipment",
+   "Duration": "5 days",
+   "Start": " Thu 6/06/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "112SS+2 days",
+   "Actual Start": "6/15/2019",
+   "Actual Finish": "6/20/2019"
+ },
+ {
+   "ID": 114,
+   "Task Name": "        Communications",
+   "Duration": "65 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 115,
+   "Task Name": "            Security (Rough)",
+   "Duration": "65 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "7/13/2019"
+ },
+ {
+   "ID": 116,
+   "Task Name": "                Approval of shop drawings and Technical submittals",
+   "Duration": "7 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 4/04/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "4/4/2019"
+ },
+ {
+   "ID": 117,
+   "Task Name": "                Delivery of Cables",
+   "Duration": "45 days",
+   "Start": " Fri 4/05/19",
+   "Finish": " Mon 5/27/19",
+   "Predecessors": "116",
+   "Actual Start": "4/5/2019",
+   "Actual Finish": "5/27/2019"
+ },
+ {
+   "ID": 118,
+   "Task Name": "                Delivery of Badge readers, controller, JB, integration software, panic bars etc",
+   "Duration": "45 days",
+   "Start": " Fri 4/05/19",
+   "Finish": " Mon 5/27/19",
+   "Predecessors": "116",
+   "Actual Start": "4/5/2019",
+   "Actual Finish": "5/27/2019"
+ },
+ {
+   "ID": 119,
+   "Task Name": "                Delivery of Camera, NVR, license etc",
+   "Duration": "45 days",
+   "Start": " Fri 4/05/19",
+   "Finish": " Mon 5/27/19",
+   "Predecessors": "116",
+   "Actual Start": "4/5/2019",
+   "Actual Finish": "7/6/2019"
+ },
+ {
+   "ID": 120,
+   "Task Name": "                Cabling in ceiling and partitions",
+   "Duration": "20 days",
+   "Start": " Tue 5/07/19",
+   "Finish": " Wed 5/29/19",
+   "Predecessors": "117FS--18 days",
+   "Actual Start": "5/7/2019",
+   "Actual Finish": "5/29/2019"
+ },
+ {
+   "ID": 121,
+   "Task Name": "                Installation of JB, Readers, controllers etc",
+   "Duration": "15 days",
+   "Start": " Tue 5/14/19",
+   "Finish": " Thu 5/30/19",
+   "Predecessors": "118FS--12 days",
+   "Actual Start": "5/14/2019",
+   "Actual Finish": "5/30/2019"
+ },
+ {
+   "ID": 122,
+   "Task Name": "                Installation of CCTV camera, NVR client desktop, integration software etc",
+   "Duration": "15 days",
+   "Start": " Tue 5/14/19",
+   "Finish": " Thu 5/30/19",
+   "Predecessors": "119FS--12 days",
+   "Actual Start": "6/24/2019",
+   "Actual Finish": "7/10/2019"
+ },
+ {
+   "ID": 123,
+   "Task Name": "                Testing and commissioning of Access control system",
+   "Duration": "4 days",
+   "Start": " Fri 5/31/19",
+   "Finish": " Tue 6/04/19",
+   "Predecessors": "121",
+   "Actual Start": "5/31/2019",
+   "Actual Finish": "6/4/2019"
+ },
+ {
+   "ID": 124,
+   "Task Name": "                Installation and Commissioning of Turnstile",
+   "Duration": "5 days",
+   "Start": " Thu 6/06/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "32",
+   "Actual Start": "6/6/2019",
+   "Actual Finish": "6/11/2019"
+ },
+ {
+   "ID": 125,
+   "Task Name": "                Testing and commissioning of CCTV systems",
+   "Duration": "3 days",
+   "Start": " Fri 5/31/19",
+   "Finish": " Mon 6/03/19",
+   "Predecessors": "122",
+   "Actual Start": "7/11/2019",
+   "Actual Finish": "7/13/2019"
+ },
+ {
+   "ID": 126,
+   "Task Name": "            AV Equipment",
+   "Duration": "63 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 6/08/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "6/22/2019"
+ },
+ {
+   "ID": 127,
+   "Task Name": "                Shop Drawing Approval",
+   "Duration": "7 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 4/04/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/20/2019"
+ },
+ {
+   "ID": 128,
+   "Task Name": "                Delivery of Cables",
+   "Duration": "25 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Thu 4/25/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 129,
+   "Task Name": "                Delivery of AV Equipments",
+   "Duration": "45 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "6/1/2019"
+ },
+ {
+   "ID": 130,
+   "Task Name": "                Execution of Cabling works",
+   "Duration": "15 days",
+   "Start": " Fri 4/26/19",
+   "Finish": " Mon 5/13/19",
+   "Predecessors": "128",
+   "Actual Start": "5/6/2019",
+   "Actual Finish": "5/22/2019"
+ },
+ {
+   "ID": 131,
+   "Task Name": "                Installtion of AV Equipments",
+   "Duration": "15 days",
+   "Start": " Mon 5/20/19",
+   "Finish": " Wed 6/05/19",
+   "Predecessors": "129",
+   "Actual Start": "6/3/2019",
+   "Actual Finish": "6/19/2019"
+ },
+ {
+   "ID": 132,
+   "Task Name": "                Testing and Commissioning of Equipments",
+   "Duration": "3 days",
+   "Start": " Thu 6/06/19",
+   "Finish": " Sat 6/08/19",
+   "Predecessors": "131",
+   "Actual Start": "6/20/2019",
+   "Actual Finish": "6/22/2019"
+ },
+ {
+   "ID": 133,
+   "Task Name": "            Data, Low-Voltage (Rough)",
+   "Duration": "53 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Tue 5/28/19",
+   "Predecessors": "",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "8/2/2019"
+ },
+ {
+   "ID": 134,
+   "Task Name": "                Review and Approval of Drawings",
+   "Duration": "3 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 3/30/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/2/2019"
+ },
+ {
+   "ID": 135,
+   "Task Name": "                Delivery of Cables, IO's, JACK panels, Racks, Cable trays",
+   "Duration": "15 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/13/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "4/13/2019"
+ },
+ {
+   "ID": 136,
+   "Task Name": "                Delivery of OFC, Face Plate, LIU etc.",
+   "Duration": "21 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/20/19",
+   "Predecessors": "42",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "4/20/2019"
+ },
+ {
+   "ID": 137,
+   "Task Name": "                Cabling Laying in ceiling and floor",
+   "Duration": "21 days",
+   "Start": " Wed 4/17/19",
+   "Finish": " Fri 5/10/19",
+   "Predecessors": "56;57",
+   "Actual Start": "5/16/2019",
+   "Actual Finish": "7/5/2019"
+ },
+ {
+   "ID": 138,
+   "Task Name": "                Laying of cable and dressing inside server & Hub rooms",
+   "Duration": "5 days",
+   "Start": " Sat 5/11/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "137",
+   "Actual Start": "7/6/2019",
+   "Actual Finish": "7/11/2019"
+ },
+ {
+   "ID": 139,
+   "Task Name": "                Laying of OFC cables",
+   "Duration": "10 days",
+   "Start": " Wed 4/17/19",
+   "Finish": " Sat 4/27/19",
+   "Predecessors": "56;57",
+   "Actual Start": "5/16/2019",
+   "Actual Finish": "5/27/2019"
+ },
+ {
+   "ID": 140,
+   "Task Name": "                Termination of Cable at Patch panels, Racks",
+   "Duration": "4 days",
+   "Start": " Fri 5/17/19",
+   "Finish": " Tue 5/21/19",
+   "Predecessors": "138",
+   "Actual Start": "7/12/2019",
+   "Actual Finish": "8/2/2019"
+ },
+ {
+   "ID": 141,
+   "Task Name": "                Termination at workstations and meeting rooms faceplates",
+   "Duration": "5 days",
+   "Start": " Tue 5/14/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "60",
+   "Actual Start": "6/1/2019",
+   "Actual Finish": "6/6/2019"
+ },
+ {
+   "ID": 142,
+   "Task Name": "                Final testing of Data & OFC Ports",
+   "Duration": "8 days",
+   "Start": " Mon 5/20/19",
+   "Finish": " Tue 5/28/19",
+   "Predecessors": "141",
+   "Actual Start": "6/7/2019",
+   "Actual Finish": "6/15/2019"
+ },
+ {
+   "ID": 143,
+   "Task Name": "            IT Closets - Carrier Ready",
+   "Duration": "30 days",
+   "Start": " Sat 4/27/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "174FF",
+   "Actual Start": "7/4/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 144,
+   "Task Name": "            IT Closets - Installation Ready",
+   "Duration": "10 days",
+   "Start": " Fri 4/05/19",
+   "Finish": " Tue 4/16/19",
+   "Predecessors": "133SS+7 days",
+   "Actual Start": "4/5/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 145,
+   "Task Name": "            IT Closets - Equipment Ready",
+   "Duration": "7 days",
+   "Start": " Fri 5/24/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "143FF",
+   "Actual Start": "7/31/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 146,
+   "Task Name": "            IT Closets - Completed",
+   "Duration": "2 days",
+   "Start": " Thu 5/30/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "145FF",
+   "Actual Start": "8/6/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 147,
+   "Task Name": "            Data Devices",
+   "Duration": "4 days",
+   "Start": " Tue 5/28/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "146FF",
+   "Actual Start": "8/3/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 148,
+   "Task Name": "        Interiors",
+   "Duration": "136 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "",
+   "Actual Start": "2/22/2019",
+   "Actual Finish": "8/23/2019"
+ },
+ {
+   "ID": 149,
+   "Task Name": "            False Flooring",
+   "Duration": "33 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 5/04/19",
+   "Predecessors": "",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/17/2019"
+ },
+ {
+   "ID": 150,
+   "Task Name": "                Raised Floor Installation",
+   "Duration": "15 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/13/19",
+   "Predecessors": "43",
+   "Actual Start": "3/28/2019",
+   "Actual Finish": "5/2/2019"
+ },
+ {
+   "ID": 151,
+   "Task Name": "                Ramps ",
+   "Duration": "6 days",
+   "Start": " Tue 4/09/19",
+   "Finish": " Mon 4/15/19",
+   "Predecessors": "150SS+10 days",
+   "Actual Start": "4/9/2019",
+   "Actual Finish": "5/3/2019"
+ },
+ {
+   "ID": 152,
+   "Task Name": "                Wooden Floor Installation",
+   "Duration": "12 days",
+   "Start": " Mon 4/22/19",
+   "Finish": " Sat 5/04/19",
+   "Predecessors": "30",
+   "Actual Start": "5/4/2019",
+   "Actual Finish": "5/17/2019"
+ },
+ {
+   "ID": 153,
+   "Task Name": "            Partition & Paneling",
+   "Duration": "50.95 days",
+   "Start": " Tue 3/19/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "",
+   "Actual Start": "4/30/2019",
+   "Actual Finish": "5/30/2019"
+ },
+ {
+   "ID": 154,
+   "Task Name": "                Partition Framework",
+   "Duration": "7 days",
+   "Start": " Tue 3/19/19",
+   "Finish": " Fri 5/03/19",
+   "Predecessors": "150SS+3 days;152SS+5 days",
+   "Actual Start": "5/10/2019",
+   "Actual Finish": "5/17/2019"
+ },
+ {
+   "ID": 155,
+   "Task Name": "                Single skinning of partitions",
+   "Duration": "17 days",
+   "Start": " Thu 3/21/19",
+   "Finish": " Tue 5/07/19",
+   "Predecessors": "154FF+3 days",
+   "Actual Start": "4/30/2019",
+   "Actual Finish": "5/21/2019"
+ },
+ {
+   "ID": 156,
+   "Task Name": "                Glass wool Insulation",
+   "Duration": "7 days",
+   "Start": " Wed 3/27/19",
+   "Finish": " Tue 5/07/19",
+   "Predecessors": "155FF",
+   "Actual Start": "5/14/2019",
+   "Actual Finish": "5/21/2019"
+ },
+ {
+   "ID": 157,
+   "Task Name": "                Double skinning of partitions",
+   "Duration": "10 days",
+   "Start": " Sat 4/27/19",
+   "Finish": " Thu 5/09/19",
+   "Predecessors": "156FF+2 days",
+   "Actual Start": "5/13/2019",
+   "Actual Finish": "5/23/2019"
+ },
+ {
+   "ID": 158,
+   "Task Name": "                Tape, Finishes & Paint Application",
+   "Duration": "6 days",
+   "Start": " Thu 5/09/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "157",
+   "Actual Start": "5/24/2019",
+   "Actual Finish": "5/30/2019"
+ },
+ {
+   "ID": 159,
+   "Task Name": "            Bulkheads",
+   "Duration": "68 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Tue 4/02/19",
+   "Predecessors": "",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "7/24/2019"
+ },
+ {
+   "ID": 160,
+   "Task Name": "                Partition Framework",
+   "Duration": "20 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Thu 2/28/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 161,
+   "Task Name": "                Single skinning of partitions",
+   "Duration": "39 days",
+   "Start": " Mon 1/21/19",
+   "Finish": " Wed 3/06/19",
+   "Predecessors": "160SS+5 days",
+   "Actual Start": "4/12/2019",
+   "Actual Finish": "6/1/2019"
+ },
+ {
+   "ID": 162,
+   "Task Name": "                Glass wool Insulation",
+   "Duration": "16 days",
+   "Start": " Mon 2/11/19",
+   "Finish": " Thu 3/14/19",
+   "Predecessors": "161FS+3 days",
+   "Actual Start": "6/6/2019",
+   "Actual Finish": "6/24/2019"
+ },
+ {
+   "ID": 163,
+   "Task Name": "                Double skinning of partitions",
+   "Duration": "5 days",
+   "Start": " Mon 3/04/19",
+   "Finish": " Fri 3/15/19",
+   "Predecessors": "162",
+   "Actual Start": "6/25/2019",
+   "Actual Finish": "6/29/2019"
+ },
+ {
+   "ID": 164,
+   "Task Name": "                Taping, Jointing & Pre final Finishing",
+   "Duration": "25 days",
+   "Start": " Tue 3/05/19",
+   "Finish": " Tue 4/02/19",
+   "Predecessors": "163SS+1 day",
+   "Actual Start": "6/26/2019",
+   "Actual Finish": "7/24/2019"
+ },
+ {
+   "ID": 165,
+   "Task Name": "            Storefronts",
+   "Duration": "84 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Thu 5/30/19",
+   "Predecessors": "",
+   "Actual Start": "5/10/2019",
+   "Actual Finish": "7/24/2019"
+ },
+ {
+   "ID": 166,
+   "Task Name": "                Storefront Partition marking in bulkhead",
+   "Duration": "10 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Tue 4/02/19",
+   "Predecessors": "164FF",
+   "Actual Start": "7/13/2019",
+   "Actual Finish": "7/24/2019"
+ },
+ {
+   "ID": 167,
+   "Task Name": "                Storefront Partition Installations",
+   "Duration": "15 days",
+   "Start": " Sat 4/27/19",
+   "Finish": " Tue 5/14/19",
+   "Predecessors": "31;152SS+5 days",
+   "Actual Start": "5/10/2019",
+   "Actual Finish": "5/27/2019"
+ },
+ {
+   "ID": 168,
+   "Task Name": "                Storefront Glazing Measurement",
+   "Duration": "1 day",
+   "Start": " Tue 5/14/19",
+   "Finish": " Tue 5/14/19",
+   "Predecessors": "167FF",
+   "Actual Start": "5/27/2019",
+   "Actual Finish": "5/27/2019"
+ },
+ {
+   "ID": 169,
+   "Task Name": "                Storefront SW & SL Door Installations",
+   "Duration": "10 days",
+   "Start": " Wed 5/15/19",
+   "Finish": " Sat 5/25/19",
+   "Predecessors": "167",
+   "Actual Start": "5/28/2019",
+   "Actual Finish": "6/7/2019"
+ },
+ {
+   "ID": 170,
+   "Task Name": "                Storefront Glass Installation",
+   "Duration": "10 days",
+   "Start": " Wed 5/15/19",
+   "Finish": " Sat 5/25/19",
+   "Predecessors": "167",
+   "Actual Start": "5/28/2019",
+   "Actual Finish": "6/7/2019"
+ },
+ {
+   "ID": 171,
+   "Task Name": "                Storefront Glass Bonding",
+   "Duration": "4 days",
+   "Start": " Mon 5/27/19",
+   "Finish": " Thu 5/30/19",
+   "Predecessors": "170",
+   "Actual Start": "6/8/2019",
+   "Actual Finish": "6/12/2019"
+ },
+ {
+   "ID": 172,
+   "Task Name": "                Storefront Hardware Installation",
+   "Duration": "10 days",
+   "Start": " Wed 5/15/19",
+   "Finish": " Sat 5/25/19",
+   "Predecessors": "167",
+   "Actual Start": "5/28/2019",
+   "Actual Finish": "6/7/2019"
+ },
+ {
+   "ID": 173,
+   "Task Name": "            Final Finishes",
+   "Duration": "26 days",
+   "Start": " Thu 5/02/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "",
+   "Actual Start": "5/11/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 174,
+   "Task Name": "                Final Coat Paint Application",
+   "Duration": "12 days",
+   "Start": " Sat 5/18/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "164;169FF+5 days",
+   "Actual Start": "7/25/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 175,
+   "Task Name": "                Fabric Wrapping",
+   "Duration": "10 days",
+   "Start": " Thu 5/02/19",
+   "Finish": " Mon 5/13/19",
+   "Predecessors": "35",
+   "Actual Start": "5/11/2019",
+   "Actual Finish": "5/22/2019"
+ },
+ {
+   "ID": 176,
+   "Task Name": "                Acoustic Felt Installation",
+   "Duration": "15 days",
+   "Start": " Sat 5/11/19",
+   "Finish": " Wed 5/29/19",
+   "Predecessors": "36",
+   "Actual Start": "5/23/2019",
+   "Actual Finish": "6/8/2019"
+ },
+ {
+   "ID": 177,
+   "Task Name": "                Skiriting Installation",
+   "Duration": "7 days",
+   "Start": " Thu 5/16/19",
+   "Finish": " Fri 5/24/19",
+   "Predecessors": "158",
+   "Actual Start": "5/31/2019",
+   "Actual Finish": "6/7/2019"
+ },
+ {
+   "ID": 178,
+   "Task Name": "                Blind supply and installation ",
+   "Duration": "3 days",
+   "Start": " Wed 5/29/19",
+   "Finish": " Fri 5/31/19",
+   "Predecessors": "174FF",
+   "Actual Start": "8/5/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 179,
+   "Task Name": "            Ceiling",
+   "Duration": "96 days",
+   "Start": " Wed 2/20/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "8/21/2019"
+ },
+ {
+   "ID": 180,
+   "Task Name": "                Window Sill Ply ",
+   "Duration": "8 days",
+   "Start": " Wed 2/20/19",
+   "Finish": " Thu 3/28/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "4/15/2019"
+ },
+ {
+   "ID": 181,
+   "Task Name": "                Window Sill Veneer",
+   "Duration": "10 days",
+   "Start": " Wed 2/20/19",
+   "Finish": " Sat 3/30/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 182,
+   "Task Name": "                Window Sill Laminate Installation",
+   "Duration": "8 days",
+   "Start": " Wed 2/20/19",
+   "Finish": " Sat 3/30/19",
+   "Predecessors": "180",
+   "Actual Start": "4/16/2019",
+   "Actual Finish": "5/7/2019"
+ },
+ {
+   "ID": 183,
+   "Task Name": "                Pelmet Ply boxing",
+   "Duration": "1 day",
+   "Start": " Wed 2/20/19",
+   "Finish": " Wed 2/20/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/20/2019"
+ },
+ {
+   "ID": 184,
+   "Task Name": "                Pelmet Veneer",
+   "Duration": "10 days",
+   "Start": " Thu 2/28/19",
+   "Finish": " Mon 3/11/19",
+   "Predecessors": "183",
+   "Actual Start": "5/21/2019",
+   "Actual Finish": "6/1/2019"
+ },
+ {
+   "ID": 185,
+   "Task Name": "                Gypsum Ceiling Framework",
+   "Duration": "4 days",
+   "Start": " Sat 6/01/19",
+   "Finish": " Wed 6/05/19",
+   "Predecessors": "163;49;133",
+   "Actual Start": "8/12/2019",
+   "Actual Finish": "8/15/2019"
+ },
+ {
+   "ID": 186,
+   "Task Name": "                Gypsum Ceiling Boarding",
+   "Duration": "4 days",
+   "Start": " Thu 6/06/19",
+   "Finish": " Mon 6/10/19",
+   "Predecessors": "185",
+   "Actual Start": "8/16/2019",
+   "Actual Finish": "8/20/2019"
+ },
+ {
+   "ID": 187,
+   "Task Name": "                Taping, Jointing & Pre final Finishing",
+   "Duration": "4 days",
+   "Start": " Fri 6/07/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "186SS+1 day",
+   "Actual Start": "8/17/2019",
+   "Actual Finish": "8/21/2019"
+ },
+ {
+   "ID": 188,
+   "Task Name": "            Toilet Works ",
+   "Duration": "136 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "8/23/2019"
+ },
+ {
+   "ID": 189,
+   "Task Name": "                Demolition of Existing Blockwork",
+   "Duration": "31 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Mon 2/18/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "6/10/2019"
+ },
+ {
+   "ID": 190,
+   "Task Name": "                New Blockwork construction",
+   "Duration": "33 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Wed 2/20/19",
+   "Predecessors": "189",
+   "Actual Start": "6/11/2019",
+   "Actual Finish": "7/18/2019"
+ },
+ {
+   "ID": 191,
+   "Task Name": "                Plumbing - Drain Pipe works",
+   "Duration": "46 days",
+   "Start": " Mon 1/14/19",
+   "Finish": " Thu 3/07/19",
+   "Predecessors": "190SS",
+   "Actual Start": "6/11/2019",
+   "Actual Finish": "8/2/2019"
+ },
+ {
+   "ID": 192,
+   "Task Name": "                Water proofing",
+   "Duration": "6 days",
+   "Start": " Mon 2/18/19",
+   "Finish": " Thu 3/07/19",
+   "Predecessors": "191FS--2 days",
+   "Actual Start": "8/1/2019",
+   "Actual Finish": "8/7/2019"
+ },
+ {
+   "ID": 193,
+   "Task Name": "                Partition ,Plaster etc.",
+   "Duration": "6 days",
+   "Start": " Mon 2/18/19",
+   "Finish": " Mon 3/11/19",
+   "Predecessors": "192FS--2 days",
+   "Actual Start": "8/6/2019",
+   "Actual Finish": "8/12/2019"
+ },
+ {
+   "ID": 194,
+   "Task Name": "                Water Supply Works",
+   "Duration": "7 days",
+   "Start": " Thu 2/21/19",
+   "Finish": " Thu 2/28/19",
+   "Predecessors": "193SS+3 days",
+   "Actual Start": "8/9/2019",
+   "Actual Finish": "8/16/2019"
+ },
+ {
+   "ID": 195,
+   "Task Name": "                Flooring in toilets",
+   "Duration": "20 days",
+   "Start": " Fri 5/24/19",
+   "Finish": " Sat 6/15/19",
+   "Predecessors": "196SS+4 days",
+   "Actual Start": "6/3/2019",
+   "Actual Finish": "6/25/2019"
+ },
+ {
+   "ID": 196,
+   "Task Name": "                Wall tiles",
+   "Duration": "20 days",
+   "Start": " Mon 5/20/19",
+   "Finish": " Tue 6/11/19",
+   "Predecessors": "34",
+   "Actual Start": "5/29/2019",
+   "Actual Finish": "6/20/2019"
+ },
+ {
+   "ID": 197,
+   "Task Name": "                Doors installation ",
+   "Duration": "7 days",
+   "Start": " Thu 6/13/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "195FS--3 days",
+   "Actual Start": "6/22/2019",
+   "Actual Finish": "6/29/2019"
+ },
+ {
+   "ID": 198,
+   "Task Name": "                Plumbing Fixtures ",
+   "Duration": "7 days",
+   "Start": " Thu 6/13/19",
+   "Finish": " Thu 6/20/19",
+   "Predecessors": "197SS",
+   "Actual Start": "6/22/2019",
+   "Actual Finish": "6/29/2019"
+ },
+ {
+   "ID": 199,
+   "Task Name": "                Ceiling Works",
+   "Duration": "10 days",
+   "Start": " Mon 3/11/19",
+   "Finish": " Fri 3/22/19",
+   "Predecessors": "193",
+   "Actual Start": "8/13/2019",
+   "Actual Finish": "8/23/2019"
+ },
+ {
+   "ID": 200,
+   "Task Name": "                Paint & Final Finishing",
+   "Duration": "10 days",
+   "Start": " Sat 6/01/19",
+   "Finish": " Wed 6/12/19",
+   "Predecessors": "195SS+7 days",
+   "Actual Start": "6/11/2019",
+   "Actual Finish": "6/21/2019"
+ },
+ {
+   "ID": 201,
+   "Task Name": "                Testing of Fixtures",
+   "Duration": "1 day",
+   "Start": " Thu 6/13/19",
+   "Finish": " Thu 6/13/19",
+   "Predecessors": "200",
+   "Actual Start": "6/22/2019",
+   "Actual Finish": "6/22/2019"
+ },
+ {
+   "ID": 202,
+   "Task Name": "            Miscellaneous",
+   "Duration": "75 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Mon 5/20/19",
+   "Predecessors": "",
+   "Actual Start": "2/22/2019",
+   "Actual Finish": "6/25/2019"
+ },
+ {
+   "ID": 203,
+   "Task Name": "                Atirum Railing Installation",
+   "Duration": "15 days",
+   "Start": " Fri 2/22/19",
+   "Finish": " Mon 3/11/19",
+   "Predecessors": "",
+   "Actual Start": "2/22/2019",
+   "Actual Finish": "5/4/2019"
+ },
+ {
+   "ID": 204,
+   "Task Name": "                Atirum Railing Painting",
+   "Duration": "10 days",
+   "Start": " Wed 3/06/19",
+   "Finish": " Sat 3/16/19",
+   "Predecessors": "203FS--5 days",
+   "Actual Start": "4/30/2019",
+   "Actual Finish": "6/7/2019"
+ },
+ {
+   "ID": 205,
+   "Task Name": "                Concrete Polishing",
+   "Duration": "45 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "6/25/2019"
+ },
+ {
+   "ID": 206,
+   "Task Name": "                    Grinding",
+   "Duration": "15 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Sat 4/13/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/21/2019"
+ },
+ {
+   "ID": 207,
+   "Task Name": "                    Sealant & Buffing",
+   "Duration": "15 days",
+   "Start": " Mon 4/15/19",
+   "Finish": " Wed 5/01/19",
+   "Predecessors": "206",
+   "Actual Start": "5/22/2019",
+   "Actual Finish": "6/7/2019"
+ },
+ {
+   "ID": 208,
+   "Task Name": "                    Final Polish",
+   "Duration": "15 days",
+   "Start": " Thu 5/02/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "207",
+   "Actual Start": "6/8/2019",
+   "Actual Finish": "6/25/2019"
+ },
+ {
+   "ID": 209,
+   "Task Name": "                Column Paneling",
+   "Duration": "10 days",
+   "Start": " Sat 4/27/19",
+   "Finish": " Wed 5/08/19",
+   "Predecessors": "167SS",
+   "Actual Start": "5/10/2019",
+   "Actual Finish": "5/21/2019"
+ },
+ {
+   "ID": 210,
+   "Task Name": "                Millwork Installation",
+   "Duration": "30 days",
+   "Start": " Thu 3/28/19",
+   "Finish": " Wed 5/01/19",
+   "Predecessors": "40",
+   "Actual Start": "4/6/2019",
+   "Actual Finish": "5/10/2019"
+ },
+ {
+   "ID": 211,
+   "Task Name": "                Carpet Installation",
+   "Duration": "7 days",
+   "Start": " Mon 5/13/19",
+   "Finish": " Mon 5/20/19",
+   "Predecessors": "37",
+   "Actual Start": "5/23/2019",
+   "Actual Finish": "5/30/2019"
+ },
+ {
+   "ID": 212,
+   "Task Name": "                Brick Jali Works at Nooks",
+   "Duration": "9 days",
+   "Start": " Tue 5/07/19",
+   "Finish": " Thu 5/16/19",
+   "Predecessors": "38",
+   "Actual Start": "5/7/2019",
+   "Actual Finish": "5/16/2019"
+ },
+ {
+   "ID": 213,
+   "Task Name": "                SS Counter Top Installation at Pantry's",
+   "Duration": "15 days",
+   "Start": " Mon 4/15/19",
+   "Finish": " Wed 5/01/19",
+   "Predecessors": "210FF",
+   "Actual Start": "4/24/2019",
+   "Actual Finish": "5/10/2019"
+ },
+ {
+   "ID": 214,
+   "Task Name": "                Phonebooth Seating & Table",
+   "Duration": "10 days",
+   "Start": " Thu 5/02/19",
+   "Finish": " Mon 5/13/19",
+   "Predecessors": "210",
+   "Actual Start": "5/11/2019",
+   "Actual Finish": "5/22/2019"
+ },
+ {
+   "ID": 215,
+   "Task Name": "                Other Built-in furnishing",
+   "Duration": "15 days",
+   "Start": " Thu 5/02/19",
+   "Finish": " Sat 5/18/19",
+   "Predecessors": "210",
+   "Actual Start": "5/11/2019",
+   "Actual Finish": "5/28/2019"
+ },
+ {
+   "ID": 216,
+   "Task Name": "    Handover",
+   "Duration": "1 day",
+   "Start": " Fri 6/21/19",
+   "Finish": " Fri 6/21/19",
+   "Predecessors": "48;114;148",
+   "Actual Start": "8/24/2019",
+   "Actual Finish": "8/24/2019"
+ }
+]
