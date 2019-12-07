@@ -209,49 +209,7 @@ function afterProcessData() {
 
     hierarchy = stratify(data);
     hierarchy.each((d)=> d._descendants= d.descendants().slice(1));
-    // console.log(hierarchy);
 
-
-    // var collapsed = [];
-
-    // tree = data => {
-    //     const root = d3.hierarchy(data);
-    //     root.dx = 10;
-    //     root.dy = 1500 / (root.height + 1);
-    //     return d3.tree().nodeSize([root.dx, root.dy])(root);
-    // }
-
-    // root = tree(data);
-
-    // let x0 = Infinity;
-    // let x1 = -x0;
-    // root.each(d => {
-    //   if (d.x > x1) x1 = d.x;
-    //   if (d.x < x0) x0 = d.x;
-    // });
-    // const g = svg.append("g")
-    //     .attr("font-family", "sans-serif")
-    //     .attr("font-size", 10)
-    //     .attr("transform", `translate(${root.dy / 3},${root.dx - x0})`);
-    // const node = g.append("g")
-    //     .attr("stroke-linejoin", "round")
-    //     .attr("stroke-width", 3)
-    //     .selectAll("g")
-    //     .data(root.descendants())
-    //     .join("g")
-    //     .attr("transform", d => `translate(${d.y},${d.x})`);
-
-    // node.append("circle")
-    //     .attr("fill", d => d.children ? "#555" : "#999")
-    //     .attr("r", 2.5);
-
-
-    /* 
-    HACK : This is temporary, 
-    make it work with native tree and
-    enter exit function
-    TODO : Animation
-    */
     function toggleChildren(d) {
         if (d.children) {
             d._children = d.children;
@@ -299,7 +257,8 @@ function afterProcessData() {
                     updateNodes(node);
                 }
             });
-
+        //FIXME: Add animation, update to text, actual
+        /*
         // actual gantt
         _grp.append("rect")
             .attr("id", d => "progress" + d.ID)
@@ -326,7 +285,10 @@ function afterProcessData() {
             .attr("x", d => timeScale(d.Finish))
             .attr("y", heightScale(index) + taskht / 2)
             .attr("class", "task");
+        */
+        
         index++;
+        
         //on click toggle children
         //change position of ids after node
         if (node.children) {
@@ -340,8 +302,6 @@ function afterProcessData() {
     function updateNodes(node) {
         // get node index
         gantt.selectAll("#task-connections").remove()
-        // HACK instead generate dfs queue
-        // let index = getDepthFirstIndex(hierarchy,node); 
         let descendents = node._descendants;
         let index = queue.indexOf(node.data);
         console.log(index);
@@ -349,9 +309,10 @@ function afterProcessData() {
         var _childs = node._children;
         toggleChildren(node);
         queue = generateDataQueue(hierarchy);
+        console.log([index+1,index+descendents.length])
         if (childs) {
             descendents.map((d) => {
-                let nodedata = d.data;
+                let nodedata = d.data||d;
                 d3.select("#id" + nodedata.ID)
                     .transition()
                     .duration(1000)
@@ -359,13 +320,21 @@ function afterProcessData() {
                     .attr("opacity", 0)
                     .attr("display", function () { setTimeout(() => this.setAttribute("display", "none"), 1000) });
             });
-        } else {
-            descendents.map((d) => {
-                let nodedata = d.data;
+            queue.slice(index+1).map((d,i) => {
+                let nodedata = d.data||d;
                 d3.select("#id" + nodedata.ID)
                     .transition()
                     .duration(1000)
-                    .attr("y", heightScale(queue.indexOf(nodedata) + 1))
+                    .attr("y", heightScale(i+index+2));
+
+            });
+        } else {
+            queue.map((d,i) => {
+                let nodedata = d.data||d;
+                d3.select("#id" + nodedata.ID)
+                    .transition()
+                    .duration(1000)
+                    .attr("y", heightScale(i + 1))
                     .attr("opacity", 0.5)
                     .attr("display", function () { this.removeAttribute("display") });
             });
