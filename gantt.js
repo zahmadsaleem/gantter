@@ -352,19 +352,23 @@ function afterProcessData() {
 
         let xa = timeScale(a[_typea]);
         let yi;
-        // if id == -1 
-        // for every parent check parent id return
+
+        // collapsed nodes are not found in queue
         let checkId = (node) => {
             let i = idqueue.indexOf(node.id);
             let anc = node.ancestors()
             if (i == -1) {
-                for (var o = 0; o < anc.length; o++) {
-                    if (!(idqueue.indexOf(anc[o].id) == -1)) return o;
+                for (var o = 1; o < anc.length; ++o) {
+                    let j = idqueue.indexOf(anc[o].id);
+                    if (!(j == -1)) {
+                        return j;
+                    }
                 }
             } else {
                 return i;
             }
         }
+        // console.log(`id ${a.ID} con ${queue[checkId(k[1])].id} -- id ${b.ID} con ${queue[checkId(k[0])].id}`);
         let ya = heightScale(checkId(k[1]) + 1);
         let xb = timeScale(b[_typeb]);
         let yb = heightScale(checkId(k[0]) + 1);
@@ -398,13 +402,14 @@ function afterProcessData() {
 
     // connection lines
     function updateConnections() {
+        console.log("update triggered");
         connections.forEach(con => {
             let boolList = [];
             con.slice(0, 2).forEach(d => {
                 boolList.push(idqueue.includes(d.id));
             });
             let val = boolList.every(i => i);
-            let id = "#con" + con[1].id + "_" + con[0].id;
+            let id = "#con_" + con[1].id + "_" + con[0].id;
             if (!val) {
                 d3.select(id).attr("class", "line filtered");
             } else {
@@ -416,7 +421,14 @@ function afterProcessData() {
         });
         // select path element
         d3.selectAll("path.filtered")
-            .attr("display", "none")
+            .transition()
+            .duration(1000)
+            .attr("opacity", 0)
+            .attr("display", function () {
+                setTimeout(() => {
+                    this.setAttribute("display", "none")
+                }, 800);
+            });
         // change d attr 
         d3.select("#task-connections")
             .selectAll("path")
@@ -445,7 +457,8 @@ function afterProcessData() {
             .enter()
             .append("path")
             .attr("class", "line")
-            .attr("id", d => "con" + d[1].id + "_" + d[0].id)
+            .attr("opacity",0.3)
+            .attr("id", d => "con_" + d[1].id + "_" + d[0].id)
             .attr("d", ptGenerator)
             .on("mouseover", function (k) {
                 if (!checkSelection(k[0].id)) {
