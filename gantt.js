@@ -208,7 +208,7 @@ function afterProcessData() {
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
 
     hierarchy = stratify(data);
-    hierarchy.each((d)=> d._descendants= d.descendants().slice(1));
+    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
 
     function toggleChildren(d) {
         if (d.children) {
@@ -227,45 +227,50 @@ function afterProcessData() {
         }
     }
 
-    var index = 1;
-    function render(grp, node) {
-        _grp = grp.append("g").datum(node.data);
+    function render(root) {
+        _grp = gantt.append("g")
+            .attr("id", "task-rectangles")
+            .selectAll("g")
+            .data(root.descendants())
+            .join("g")
+            .attr("id",d=>"grp"+d.id);
+
         //append to group
         _grp.append("rect")
-            .attr("id", d => "id" + d.ID)
-            .attr("x", d => timeScale(d.Start))
-            .attr("y", heightScale(index))
+            .attr("id", d => "id" + d.id)
+            .attr("x", d => timeScale(d.data.Start))
+            .attr("y", (d) => heightScale(queue.indexOf(d.data) + 1))
             .attr("width", d => {
-                let _w = timeScale(d.Finish) - timeScale(d.Start);
+                let _w = timeScale(d.data.Finish) - timeScale(d.data.Start);
                 return _w > 10 ? _w : 10;
             })
             .attr("height", taskht)
             .attr("rx", 2)
             .attr("ry", 2)
             .attr("opacity", 0.5)
-            .attr("class", d => hasChildren(d) ? "task-parent" : "task-rect")
+            .attr("class", d => hasChildren(d.data) ? "task-parent" : "task-rect")
             .on("click", function (d) {
                 d3.event.stopPropagation();
                 removeSelection();
                 Array.from(document.querySelectorAll("#task-connections path"))
-                    .filter((k) => k.id.split("_").includes(d.ID))
+                    .filter((k) => k.id.split("_").includes(d.id))
                     .forEach(el => d3.select(el).attr("class", "selected"));
-                d3.select("#id" + d.ID).attr("class", "selected");
+                d3.select("#id" + d.id).attr("class", "selected");
             })
             .on("dblclick", function (d) {
-                if (d.children) {
-                    updateNodes(node);
+                if (d.children || d._children) {
+                    updateNodes(d);
                 }
             });
         //FIXME: Add animation, update to text, actual
-        /*
+
         // actual gantt
         _grp.append("rect")
-            .attr("id", d => "progress" + d.ID)
-            .attr("x", d => timeScale(d.ActualStart))
-            .attr("y", heightScale(index) + taskht / 3)
+            .attr("id", d => "progress" + d.id)
+            .attr("x", d => timeScale(d.data.ActualStart))
+            .attr("y", (d) => heightScale(queue.indexOf(d.data) + 1) + taskht / 3)
             .attr("width", d => {
-                let _w = timeScale(d.ActualFinish) - timeScale(d.ActualStart);
+                let _w = timeScale(d.data.ActualFinish) - timeScale(d.data.ActualStart);
                 return _w > 10 ? _w : 10;
             })
             .attr("height", taskht / 2)
@@ -275,28 +280,17 @@ function afterProcessData() {
 
         //task names
         _grp.append("text")
-            .text(d => hasChildren(d) ? d.TaskName.toUpperCase() : d.TaskName)
-            .attr("x", d => hasChildren(d) ? timeScale(d.Start) + 10 : 10)
-            .attr("y", heightScale(index) + taskht / 2)
+            .text(d => hasChildren(d.data) ? d.data.TaskName.toUpperCase() : d.data.TaskName)
+            .attr("x", d => hasChildren(d.data) ? timeScale(d.data.Start) + 10 : 10)
+            .attr("y", (d) => heightScale(queue.indexOf(d.data)+1) + taskht / 2)
             .attr("class", "task");
         //task IDs
         _grp.append("text")
-            .text(d => d.ID)
-            .attr("x", d => timeScale(d.Finish))
-            .attr("y", heightScale(index) + taskht / 2)
+            .text(d => d.id)
+            .attr("x", d => timeScale(d.data.Finish))
+            .attr("y", (d) => heightScale(queue.indexOf(d.data)+1) + taskht / 2)
             .attr("class", "task");
-        */
-        
-        index++;
-        
-        //on click toggle children
-        //change position of ids after node
-        if (node.children) {
-            let group1 = grp.append("g");
-            node.children.forEach((child) => {
-                render(group1, child);
-            });
-        }
+    
     }
 
     function updateNodes(node) {
@@ -304,34 +298,32 @@ function afterProcessData() {
         gantt.selectAll("#task-connections").remove()
         let descendents = node._descendants;
         let index = queue.indexOf(node.data);
-        console.log(index);
         var childs = node.children;
         var _childs = node._children;
         toggleChildren(node);
         queue = generateDataQueue(hierarchy);
-        console.log([index+1,index+descendents.length])
         if (childs) {
             descendents.map((d) => {
-                let nodedata = d.data||d;
-                d3.select("#id" + nodedata.ID)
+                let nodedata = d.data || d;
+                d3.selectAll("#grp" + nodedata.ID + " *")
                     .transition()
                     .duration(1000)
                     .attr("y", heightScale(index + 1))
                     .attr("opacity", 0)
                     .attr("display", function () { setTimeout(() => this.setAttribute("display", "none"), 1000) });
             });
-            queue.slice(index+1).map((d,i) => {
-                let nodedata = d.data||d;
-                d3.select("#id" + nodedata.ID)
+            queue.slice(index + 1).map((d, i) => {
+                let nodedata = d.data || d;
+                d3.selectAll("#grp" + nodedata.ID + " *")
                     .transition()
                     .duration(1000)
-                    .attr("y", heightScale(i+index+2));
+                    .attr("y", heightScale(i + index + 2));
 
             });
         } else {
-            queue.map((d,i) => {
-                let nodedata = d.data||d;
-                d3.select("#id" + nodedata.ID)
+            queue.map((d, i) => {
+                let nodedata = d.data || d;
+                d3.selectAll("#grp" + nodedata.ID + " *")
                     .transition()
                     .duration(1000)
                     .attr("y", heightScale(i + 1))
@@ -351,15 +343,9 @@ function afterProcessData() {
     // .range([0, w - 50]);
     // .clamp(true);
 
-
     var heightScale = d3.scaleLinear()
         .domain([1, data.length])
         .range([0, h - 50]);
-
-    // main container for gantt chart
-    gantt = svg.append("g")
-        .attr("id", "gantt")
-        .attr("transform", "translate(20,20)");
 
     var lineGenerator = d3.line()
         .x((d) => d[0])
@@ -461,11 +447,17 @@ function afterProcessData() {
                 d3.select(this).attr("class", "selected");
             })
     }
+
     console.log(connections);
+
+    // main container for gantt chart
+    gantt = svg.append("g")
+        .attr("id", "gantt")
+        .attr("transform", "translate(20,20)");
 
     //execute 
     queue = generateDataQueue(hierarchy);
-    render(gantt, hierarchy);
+    render(hierarchy);
     drawConnections();
 
     // time slider
