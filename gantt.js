@@ -1,4 +1,4 @@
-var w = window.innerWidth * 0.63,
+var w,
     h,
     taskht = 15,
     progressht = 8,
@@ -18,11 +18,16 @@ var svg,
     queue = [],
     idqueue = [];
 
-function getSvgHeight(data) {
+function updateHeight(data) {
     let wh = window.innerHeight * 0.85
     let sh = data.length * (taskht + gap)
-    return sh > wh ? sh : wh;
+    h = sh > wh ? sh : wh;
 }
+function updateWidth() {
+    w = window.innerWidth > 1060 ? window.innerWidth * 0.63 : window.innerWidth * 0.9;
+}
+
+
 
 function removeSelection() {
     d3.selectAll("path.selected").attr("class", "line");
@@ -196,10 +201,45 @@ function afterProcessData() {
             .attr("class", "svg")
             .attr("overflow", "scroll");
 
+        // time slider
+        var dragPosition = d3.mean(timeScale.range());
+        var setCurrentDate = (dragPosition) => {
+            let _d = new Date(timeScale.invert(dragPosition));
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
+        }
+
         // main container for gantt chart
         gantt = svg.append("g")
             .attr("id", "gantt")
             .attr("transform", "translate(20,20)");
+
+        drawConnections();
+        setCurrentDate(dragPosition);
+
+        gantt.append("path")
+            .attr("id", "date-selector")
+            .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
+            .call(d3.drag()
+                .on("drag", function () {
+                    const range = timeScale.range();
+                    let checkMouseX = pos => {
+                        if (pos < range[1] && pos > range[0]) {
+                            dragPosition = pos;
+                            return pos;
+                        } else {
+                            return dragPosition;
+                        }
+                    }
+                    d3.select(this)
+                        .attr("d", () => {
+                            let ptx = checkMouseX(d3.event.x);
+                            return lineGenerator([[ptx, 0], [ptx, h]])
+                        });
+
+                    setCurrentDate(dragPosition);
+                }
+                ));
 
         _grp = gantt.append("g")
             .attr("id", "task-rectangles")
@@ -265,11 +305,16 @@ function afterProcessData() {
 
         //task names
         _grp.append("text")
-            .text(d => hasChildren(d.data) ? d.data.TaskName.toUpperCase() : d.data.TaskName)
-            .attr("x", d => /* hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
+            .text(d => /* hasChildren(d.data) ? d.data.TaskName.toUpperCase() : */ d.data.TaskName)
+            .attr("x",/* d =>  hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
             .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
             .attr("class", "task")
-            .attr("transform", `translate(0,${taskNameTopOffset})`);
+            .attr("transform", `translate(0,${taskNameTopOffset})`)
+            .each(function () {
+                if (!isVisibilityAllowed(this)) {
+                    this.setAttribute("display", "none");
+                }
+            });
 
         /* //task IDs
         _grp.append("text")
@@ -279,64 +324,46 @@ function afterProcessData() {
             .attr("class", "task")
             .attr("transform", `translate(0,${IdTopOffset})`); */
 
-        drawConnections();
 
-        // time slider
-        var dragPosition = d3.mean(timeScale.range());
-        var setCurrentDate = (dragPosition) => {
-            let _d = new Date(timeScale.invert(dragPosition));
-            const options = { year: 'numeric', month: 'long', day: 'numeric' };
-            document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
-        }
-
-        gantt.append("path")
-            .attr("id", "date-selector")
-            .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
-            .call(d3.drag()
-                .on("drag", function () {
-
-                    const range = timeScale.range();
-                    let checkMouseX = pos => {
-                        if (pos < range[1] && pos > range[0]) {
-                            dragPosition = pos;
-                            return pos;
-                        } else {
-                            return dragPosition;
-                        }
-                    }
-                    d3.select(this)
-                        .attr("d", () => {
-                            let ptx = checkMouseX(d3.event.x);
-                            return lineGenerator([[ptx, 0], [ptx, h]])
-                        });
-
-                    setCurrentDate(dragPosition);
-                }
-                ));
-
-        setCurrentDate(dragPosition);
     }
 
     function updateNodes(node) {
+
         // get node index
         let descendants = node._descendants;
         let index = queue.indexOf(node);
         var childs = node.children;
         toggleChildren(node);
+
         let q = generateDataQueue(hierarchy);
         queue = q[0];
         idqueue = q[1];
+
+        updateHeight(queue);
+        updateConnections();
+        svg
+            .transition()
+            .duration(duration)
+            .attr("height", h);
+
+
         if (childs) {
             descendants.map((d) => {
                 let nodedata = d.data || d;
                 d3.selectAll("#grp" + nodedata.ID + " *")
                     .classed("hidden", true)
+                    .each(function () {
+                        setTimeout(() => {
+                            if (isVisibilityAllowed(this)) {
+                                // console.log("settin");
+                                this.setAttribute("display", "none")
+                            }
+                        }, duration)
+                    })
                     .transition()
                     .ease(d3.easeCubic)
                     .duration(duration)
-                    .attr("y", heightScale(index + 1))
-                    // .attr("opacity", 0)
-                    .attr("display", function () { setTimeout(() => this.setAttribute("display", "none"), duration) });
+                    .attr("y", heightScale(index + 1));
             });
             queue.slice(index + 1).map((d, i) => {
                 let nodedata = d.data || d;
@@ -345,32 +372,37 @@ function afterProcessData() {
                     .ease(d3.easeCubic)
                     .duration(duration)
                     .attr("y", heightScale(i + index + 2));
-
             });
         } else {
             queue.map((d, i) => {
                 let nodedata = d.data || d;
                 d3.selectAll("#grp" + nodedata.ID + " *")
                     .classed("hidden", false)
+                    .each(function () {
+                        if (isVisibilityAllowed(this)) {
+                            this.setAttribute("display", "block");
+                        }
+                    })
                     .transition()
                     .ease(d3.easeCubic)
                     .duration(duration)
-                    .attr("y", heightScale(i + 1))
-                    // .attr("opacity", 0.5)
-                    .attr("display", function () {
-                        if ((!this.classList.contains("task-actual")) || isProgressVisible.checked) {
-                            console.log(this.id)
-                            this.removeAttribute("display");
-                        }
-                    });
+                    .attr("y", heightScale(i + 1));
             });
         }
 
-        updateConnections();
-        h = getSvgHeight(queue);
-        svg.transition().duration(duration).attr("height", h);
     }
 
+    function isVisibilityAllowed(d) {
+        if (d.id.startsWith("progress")) {
+            return isProgressVisible.checked;
+        } else if (d.classList.contains("task")) {
+            return isTextVisible.checked;
+        } else if (d.id.startsWith("id")) {
+            return true;
+        } else {
+            return true;
+        }
+    }
     // path points for connection lines
     function ptGenerator(k, outputPts) {
         // [x,y]
@@ -525,6 +557,20 @@ function afterProcessData() {
         // 
     }
 
+    function updateScale(data) {
+        // x scale
+        timeScale = d3.scaleTime()
+            .domain([d3.min(data, d => d.Start),
+            d3.max(data, d => d.ActualFinish)])
+            .range([0, w - 50]);
+        // y scale
+        heightScale = d3.scaleLinear()
+            .domain([1, data.length])
+            .range([0, h - 50]);
+
+    }
+
+    // setting up the data structure
     var stratify = d3.stratify()
         .id(d => d.ID)
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
@@ -541,30 +587,11 @@ function afterProcessData() {
         arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
     });
 
-    document.querySelector("body").addEventListener("click", removeSelection);
-    h = getSvgHeight(data);
-
-    // x scale
-    var timeScale = d3.scaleTime()
-        .domain([d3.min(data, d => d.Start),
-        d3.max(data, d => d.ActualFinish)])
-        .range([0, w - 50]);
-
-    var heightScale = d3.scaleLinear()
-        .domain([1, data.length])
-        .range([0, h - 50]);
-
+    // path generator for dependency links
     var lineGenerator = d3.line()
         .x((d) => d[0])
         .y((d) => d[1])
         .curve(d3.curveStep);
-
-    //execute 
-    let q = generateDataQueue(hierarchy);
-    queue = q[0]
-    idqueue = q[1];
-    render(hierarchy);
-
 
     let isLinksVisible = document.getElementById("isLinksVisible")
     isLinksVisible.checked = true;
@@ -572,7 +599,7 @@ function afterProcessData() {
         if (!this.checked) {
             d3.select("#task-connections").attr("display", "none")
         } else {
-            d3.selectAll("#task-connections").attr("display", function () { this.removeAttribute("display") })
+            d3.selectAll("#task-connections").attr("display", "block")
         }
     })
 
@@ -582,9 +609,36 @@ function afterProcessData() {
         if (!this.checked) {
             d3.selectAll(".task-actual").attr("display", "none");
         } else {
-            d3.selectAll(".task-actual").attr("display", function () { this.removeAttribute("display") });
+            d3.selectAll(".task-actual:not(.hidden)").attr("display", "block");
         }
     })
+
+    let isTextVisible = document.getElementById("isTextVisible")
+    isTextVisible.checked = false;
+    isTextVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.selectAll("g text").attr("display", "none");
+        } else {
+            d3.selectAll("g text:not(.hidden)").attr("display", "block");
+        }
+    })
+
+    document.querySelector("#gantt-container").addEventListener("click", removeSelection);
+    window.addEventListener("resize", () => {
+        svg.remove();
+        updateHeight(queue);
+        updateWidth();
+        render(hierarchy);
+    })
+
+    //execute 
+    let q = generateDataQueue(hierarchy);
+    queue = q[0]
+    idqueue = q[1];
+    updateHeight(data);
+    updateWidth();
+    updateScale(data);
+    render(hierarchy);
 
 }
 
