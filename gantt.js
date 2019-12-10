@@ -1,26 +1,28 @@
-var w = 2500;
-var h = 5000;
-var taskht = 20;
-var progressht = 10;
-var progressTopOffset = taskht / 3;
-var taskNameTopOffset = taskht / 3;
-var IdTopOffset = taskht / 3;
+var w = window.innerWidth * 0.63,
+    h,
+    taskht = 15,
+    progressht = 8,
+    gap = 4,
+    progressTopOffset = (taskht - progressht) / 2,
+    taskNameTopOffset = taskht / 3,
+    IdTopOffset = taskht / 3,
+    duration = 1000;
 
-var svg = d3.select("body")
-    .append("svg")
-    .attr("width", w)
-    .attr("height", h)
-    .attr("class", "svg")
-    .attr("overflow", "scroll");
+var svg,
+    data,
+    group,
+    gantt,
+    tree,
+    hierarchy,
+    connections = [],
+    queue = [],
+    idqueue = [];
 
-var data;
-var group;
-var gantt;
-var tree;
-var hierarchy;
-var connections = [];
-var queue = [];
-var idqueue = [];
+function getSvgHeight(data) {
+    let wh = window.innerHeight * 0.85
+    let sh = data.length * (taskht + gap)
+    return sh > wh ? sh : wh;
+}
 
 function removeSelection() {
     d3.selectAll("path.selected").attr("class", "line");
@@ -36,6 +38,7 @@ function toggleChildren(d) {
         d._children = null;
     }
 }
+
 function hasChildren(d) {
     if (d.children) {
         return !d.children.length == 0
@@ -43,8 +46,6 @@ function hasChildren(d) {
         return !d._children.length == 0
     }
 }
-
-document.querySelector("body").addEventListener("click", removeSelection)
 
 function getTaskByID(id) {
     let task = data.filter((d) => d.ID == id);
@@ -122,7 +123,7 @@ function processProjectData() {
                 let c = t.search(/,/);
                 return sc == -1 ? t.split(",") : t.split(";");
             }(item.Predecessors.replace(/\s/g, ""));
-            // delimiters could be different
+            // NOTE : delimiters could be different
             _preArray.forEach((link) => {
                 var preObject = {};
                 const rePre = /^\d+/g;
@@ -178,7 +179,7 @@ function processProjectData() {
         }
     });
 
-    console.log(data);
+    // console.log(data);
     // console.log(connections);
 
     afterProcessData();
@@ -187,21 +188,19 @@ function processProjectData() {
 // main function after data processing
 function afterProcessData() {
 
-    var stratify = d3.stratify()
-        .id(d => d.ID)
-        .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
-
-    hierarchy = stratify(data);
-    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
-    _flatHierarchy = {};
-    hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
-
-    // rebuild connections with hierarchy data
-    connections.map((con, i, arr) => {
-        arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
-    });
-
     function render(root) {
+        svg = d3.select("#gantt-container")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h)
+            .attr("class", "svg")
+            .attr("overflow", "scroll");
+
+        // main container for gantt chart
+        gantt = svg.append("g")
+            .attr("id", "gantt")
+            .attr("transform", "translate(20,20)");
+
         _grp = gantt.append("g")
             .attr("id", "task-rectangles")
             .selectAll("g")
@@ -221,7 +220,7 @@ function afterProcessData() {
             .attr("height", taskht)
             .attr("rx", 2)
             .attr("ry", 2)
-            .attr("opacity", 0.5)
+            // .attr("opacity", 0.5)
             .attr("class", d => hasChildren(d.data) ? "task-parent" : "task-rect")
             .on("click", function (d) {
                 d3.event.stopPropagation();
@@ -248,27 +247,74 @@ function afterProcessData() {
             .attr("class", "task-actual")
             .attr("rx", 2)
             .attr("ry", 2)
+            // .attr("opacity", 0.5)
             .transition()
-            .duration(800)
+            .duration(duration * 0.8)
             .attr("width", d => {
                 let _w = timeScale(d.data.ActualFinish) - timeScale(d.data.ActualStart);
                 return _w > 10 ? _w : 10;
             });
 
+        _grp.append("rect")
+            .attr("x", 0)
+            .attr("y", d => heightScale(queue.indexOf(d) + 1))
+            .attr("width", w)
+            .attr("height", 1)
+            .attr("transform", `translate(0,${taskht / 2})`)
+            .attr("class", "marker");
+
         //task names
         _grp.append("text")
             .text(d => hasChildren(d.data) ? d.data.TaskName.toUpperCase() : d.data.TaskName)
-            .attr("x", d => hasChildren(d.data) ? timeScale(d.data.Start) + 10 : 10)
+            .attr("x", d => /* hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
             .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
             .attr("class", "task")
             .attr("transform", `translate(0,${taskNameTopOffset})`);
-        //task IDs
+
+        /* //task IDs
         _grp.append("text")
             .text(d => d.id)
             .attr("x", d => timeScale(d.data.Finish))
             .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
             .attr("class", "task")
-            .attr("transform", `translate(0,${IdTopOffset})`);
+            .attr("transform", `translate(0,${IdTopOffset})`); */
+
+        drawConnections();
+
+        // time slider
+        var dragPosition = d3.mean(timeScale.range());
+        var setCurrentDate = (dragPosition) => {
+            let _d = new Date(timeScale.invert(dragPosition));
+            const options = { year: 'numeric', month: 'long', day: 'numeric' };
+            document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
+        }
+
+        gantt.append("path")
+            .attr("id", "date-selector")
+            .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
+            .call(d3.drag()
+                .on("drag", function () {
+
+                    const range = timeScale.range();
+                    let checkMouseX = pos => {
+                        if (pos < range[1] && pos > range[0]) {
+                            dragPosition = pos;
+                            return pos;
+                        } else {
+                            return dragPosition;
+                        }
+                    }
+                    d3.select(this)
+                        .attr("d", () => {
+                            let ptx = checkMouseX(d3.event.x);
+                            return lineGenerator([[ptx, 0], [ptx, h]])
+                        });
+
+                    setCurrentDate(dragPosition);
+                }
+                ));
+
+        setCurrentDate(dragPosition);
     }
 
     function updateNodes(node) {
@@ -276,7 +322,6 @@ function afterProcessData() {
         let descendants = node._descendants;
         let index = queue.indexOf(node);
         var childs = node.children;
-        var _childs = node._children;
         toggleChildren(node);
         let q = generateDataQueue(hierarchy);
         queue = q[0];
@@ -285,17 +330,20 @@ function afterProcessData() {
             descendants.map((d) => {
                 let nodedata = d.data || d;
                 d3.selectAll("#grp" + nodedata.ID + " *")
+                    .classed("hidden", true)
                     .transition()
-                    .duration(1000)
+                    .ease(d3.easeCubic)
+                    .duration(duration)
                     .attr("y", heightScale(index + 1))
-                    .attr("opacity", 0)
-                    .attr("display", function () { setTimeout(() => this.setAttribute("display", "none"), 1000) });
+                    // .attr("opacity", 0)
+                    .attr("display", function () { setTimeout(() => this.setAttribute("display", "none"), duration) });
             });
             queue.slice(index + 1).map((d, i) => {
                 let nodedata = d.data || d;
                 d3.selectAll("#grp" + nodedata.ID + " *")
                     .transition()
-                    .duration(1000)
+                    .ease(d3.easeCubic)
+                    .duration(duration)
                     .attr("y", heightScale(i + index + 2));
 
             });
@@ -303,38 +351,31 @@ function afterProcessData() {
             queue.map((d, i) => {
                 let nodedata = d.data || d;
                 d3.selectAll("#grp" + nodedata.ID + " *")
+                    .classed("hidden", false)
                     .transition()
-                    .duration(1000)
+                    .ease(d3.easeCubic)
+                    .duration(duration)
                     .attr("y", heightScale(i + 1))
-                    .attr("opacity", 0.5)
-                    .attr("display", function () { this.removeAttribute("display") });
+                    // .attr("opacity", 0.5)
+                    .attr("display", function () {
+                        if ((!this.classList.contains("task-actual")) || isProgressVisible.checked) {
+                            console.log(this.id)
+                            this.removeAttribute("display");
+                        }
+                    });
             });
         }
 
         updateConnections();
+        h = getSvgHeight(queue);
+        svg.transition().duration(duration).attr("height", h);
     }
-
-    // x scale
-    var timeScale = d3.scaleTime()
-        .domain([d3.min(data, d => d.Start),
-        d3.max(data, d => d.Finish)])
-        .range([0, 800]);
-    // .range([0, w - 50]);
-    // .clamp(true);
-
-    var heightScale = d3.scaleLinear()
-        .domain([1, data.length])
-        .range([0, h - 50]);
-
-    var lineGenerator = d3.line()
-        .x((d) => d[0])
-        .y((d) => d[1])
-        .curve(d3.curveStep);
 
     // path points for connection lines
     function ptGenerator(k, outputPts) {
         // [x,y]
-        let offset = 5;
+        let offsetX = 3;
+        let offsetY = taskht / 2;
         var ptList = [];
         var pta = [];
         var ptb = [];
@@ -351,9 +392,8 @@ function afterProcessData() {
         }
 
         let xa = timeScale(a[_typea]);
-        let yi;
-
         // collapsed nodes are not found in queue
+        // in that case use parent's position
         let checkId = (node) => {
             let i = idqueue.indexOf(node.id);
             let anc = node.ancestors()
@@ -369,26 +409,26 @@ function afterProcessData() {
             }
         }
         // console.log(`id ${a.ID} con ${queue[checkId(k[1])].id} -- id ${b.ID} con ${queue[checkId(k[0])].id}`);
-        let ya = heightScale(checkId(k[1]) + 1);
+        let ya = heightScale(checkId(k[1]) + 1) + offsetY;
         let xb = timeScale(b[_typeb]);
-        let yb = heightScale(checkId(k[0]) + 1);
+        let yb = heightScale(checkId(k[0]) + 1) + offsetY;
         let sign = +a.ID > +b.ID ? - 1 : 1;// prdecessor id > item id 
-        let factor = offset * sign;
+        let factor = (offsetY + gap / 3) * sign;
         if (_typea == "Start") {
-            pta.push([xa + offset, ya]);
-            pta.push([xa + offset, ya + factor]);
+            pta.push([xa - offsetX, ya]);
+            pta.push([xa - offsetX, ya + factor]);
 
         } else if (_typea == "Finish") {
-            pta.push([xa - offset, ya]);
-            pta.push([xa - offset, ya + factor]);
+            pta.push([xa + offsetX, ya]);
+            pta.push([xa + offsetX, ya + factor]);
         }
 
         if (_typeb == "Start") {
-            ptb.push([xb + offset, yb]);
-            ptb.push([xb + offset, yb + factor * -1]);
+            ptb.push([xb - offsetX, yb]);
+            ptb.push([xb - offsetX, yb + factor * -1]);
         } else if (_typeb == "Finish") {
-            ptb.push([xb - offset, yb]);
-            ptb.push([xb - offset, yb + factor * -1]);
+            ptb.push([xb + offsetX, yb]);
+            ptb.push([xb + offsetX, yb + factor * -1]);
         }
 
         ptList = [...pta, ...ptb].sort((a, b) => a[1] - b[1]);
@@ -398,48 +438,6 @@ function afterProcessData() {
 
     function checkSelection(id) {
         return d3.select("#id" + id).attr("class").includes("selected");
-    }
-
-    // connection lines
-    function updateConnections() {
-        console.log("update triggered");
-        connections.forEach(con => {
-            let boolList = [];
-            con.slice(0, 2).forEach(d => {
-                boolList.push(idqueue.includes(d.id));
-            });
-            let val = boolList.every(i => i);
-            let id = "#con_" + con[1].id + "_" + con[0].id;
-            if (!val) {
-                d3.select(id).attr("class", "line filtered");
-            } else {
-                d3.select(id).attr("class", "line")
-                    .attr("display", function () { this.removeAttribute("display") });
-            } // toggle filtered class 
-
-            return val;
-        });
-        // select path element
-        d3.selectAll("path.filtered")
-            .transition()
-            .duration(1000)
-            .attr("opacity", 0)
-            .attr("display", function () {
-                setTimeout(() => {
-                    this.setAttribute("display", "none")
-                }, 800);
-            });
-        // change d attr 
-        d3.select("#task-connections")
-            .selectAll("path")
-            .transition()
-            .duration(1000)
-            .attr("d", function (d) {
-                let ptList = ptGenerator(d, false);
-                return lineGenerator(ptList);
-            })
-
-        // 
     }
 
     function drawConnections() {
@@ -457,7 +455,7 @@ function afterProcessData() {
             .enter()
             .append("path")
             .attr("class", "line")
-            .attr("opacity",0.3)
+            .attr("opacity", 0.3)
             .attr("id", d => "con_" + d[1].id + "_" + d[0].id)
             .attr("d", ptGenerator)
             .on("mouseover", function (k) {
@@ -486,47 +484,107 @@ function afterProcessData() {
                 d3.select(this).attr("class", "selected");
             })
     }
+    // connection lines
+    function updateConnections() {
+        connections.forEach(con => {
+            let boolList = [];
+            con.slice(0, 2).forEach(d => {
+                boolList.push(idqueue.includes(d.id));
+            });
+            let val = boolList.every(i => i);
+            let id = "#con_" + con[1].id + "_" + con[0].id;
+            if (!val) {
+                d3.select(id).attr("class", "line filtered");
+            } else {
+                d3.select(id).attr("class", "line")
+                    .attr("display", function () { setTimeout(() => this.removeAttribute("display"), duration / 2) });
+            } // toggle filtered class 
 
-    console.log(connections);
+            return val;
+        });
+        // select path element
+        d3.selectAll("path.filtered")
+            .transition()
+            .duration(duration)
+            .attr("opacity", 0)
+            .attr("display", function () {
+                setTimeout(() => {
+                    this.setAttribute("display", "none")
+                }, duration / 2);
+            });
+        // change d attr 
+        d3.select("#task-connections")
+            .selectAll("path")
+            .transition()
+            .duration(duration)
+            .attr("d", function (d) {
+                let ptList = ptGenerator(d, false);
+                return lineGenerator(ptList);
+            })
 
-    // main container for gantt chart
-    gantt = svg.append("g")
-        .attr("id", "gantt")
-        .attr("transform", "translate(20,20)");
+        // 
+    }
+
+    var stratify = d3.stratify()
+        .id(d => d.ID)
+        .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
+
+    hierarchy = stratify(data);
+
+    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
+    _flatHierarchy = {};
+
+    hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
+
+    // rebuild connections with hierarchy data
+    connections.map((con, i, arr) => {
+        arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
+    });
+
+    document.querySelector("body").addEventListener("click", removeSelection);
+    h = getSvgHeight(data);
+
+    // x scale
+    var timeScale = d3.scaleTime()
+        .domain([d3.min(data, d => d.Start),
+        d3.max(data, d => d.ActualFinish)])
+        .range([0, w - 50]);
+
+    var heightScale = d3.scaleLinear()
+        .domain([1, data.length])
+        .range([0, h - 50]);
+
+    var lineGenerator = d3.line()
+        .x((d) => d[0])
+        .y((d) => d[1])
+        .curve(d3.curveStep);
 
     //execute 
     let q = generateDataQueue(hierarchy);
     queue = q[0]
     idqueue = q[1];
     render(hierarchy);
-    drawConnections();
 
-    // time slider
-    var dragPosition = d3.mean(timeScale.range());
-    gantt.append("path")
-        .attr("id", "date-selector")
-        .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
-        .call(d3.drag()
-            .on("drag", function () {
-                const range = timeScale.range();
-                let checkMouseX = pos => {
-                    if (pos < range[1] && pos > range[0]) {
-                        dragPosition = pos;
-                        return pos;
-                    } else {
-                        return dragPosition;
-                    }
-                }
-                d3.select(this)
-                    .attr("d", () => {
-                        let ptx = checkMouseX(d3.event.x);
-                        return lineGenerator([[ptx, 0], [ptx, h]])
-                    });
-            }
-            ));
 
-    var event = new Event('dataloaded');
-    // document.dispatchEvent(event);
+    let isLinksVisible = document.getElementById("isLinksVisible")
+    isLinksVisible.checked = true;
+    isLinksVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.select("#task-connections").attr("display", "none")
+        } else {
+            d3.selectAll("#task-connections").attr("display", function () { this.removeAttribute("display") })
+        }
+    })
+
+    let isProgressVisible = document.getElementById("isProgressVisible")
+    isProgressVisible.checked = true;
+    isProgressVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.selectAll(".task-actual").attr("display", "none");
+        } else {
+            d3.selectAll(".task-actual").attr("display", function () { this.removeAttribute("display") });
+        }
+    })
 
 }
 

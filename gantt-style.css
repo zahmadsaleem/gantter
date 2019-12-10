@@ -1,0 +1,72 @@
+.line {
+  fill: none;
+  stroke: steelblue;
+  stroke-width: 1.5px;
+}
+
+.line:hover {
+  fill: none;
+  stroke: red;
+  stroke-width: 3px;
+  opacity: 1;
+}
+
+.select-rect {
+  fill: turquoise;
+}
+
+path.selected {
+  fill: none;
+  stroke: #f6c6a9;
+  stroke-width: 2px;
+  opacity: 1;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.task {
+  fill: rgb(255, 255, 255);
+  font-weight: 400;
+  font-size: xx-small;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  opacity: 0.8;
+}
+
+.task-rect {
+  fill: #14568c;
+  /* opacity: 0.5; */
+}
+.task-actual {
+  fill: #a10b39;
+}
+
+.task-parent {
+  fill: #3fa9ff;
+}
+
+.task-rect:hover {
+  opacity: 0.8;
+}
+
+rect.selected {
+  fill: turquoise;
+}
+
+#date-selector {
+   stroke-width: 3px ;
+   stroke: rgb(255, 0, 157);
+   fill: black;
+}
+
+#date-selector:hover{
+  cursor: e-resize;
+}
+
+.line-target{
+  fill: rgb(201, 177, 40);
+}
+
+.marker{
+  fill: white;
+  opacity: 0.2;
+}
