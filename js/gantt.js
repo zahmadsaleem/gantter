@@ -272,7 +272,7 @@ function afterProcessData() {
             })
             .on("dblclick", function (d) {
                 if (d.children || d._children) {
-                    updateNodes(d);
+                    toggleNodes(d);
                 }
             });
 
@@ -327,7 +327,7 @@ function afterProcessData() {
 
     }
 
-    function updateNodes(node) {
+    function toggleNodes(node) {
 
         // get node index
         let descendants = node._descendants;
@@ -631,6 +631,7 @@ function afterProcessData() {
         render(hierarchy);
     })
 
+    
     //execute 
     let q = generateDataQueue(hierarchy);
     queue = q[0]
@@ -639,6 +640,6 @@ function afterProcessData() {
     updateWidth();
     updateScale(data);
     render(hierarchy);
-
+  
 }
 
