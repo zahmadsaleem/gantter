@@ -95,8 +95,8 @@ function generateDataQueue(root) {
 }
 
 // either json or csv
-d3.json("./convertcsv.json")
-    // d3.json("./schedule.json")
+d3.json("./data/convertcsv.json")
+    // d3.json("./data/schedule.json")
     .then(d => {
         // remove spaces from json keys
         data = JSON.parse(
