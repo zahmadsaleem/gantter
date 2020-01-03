@@ -193,7 +193,7 @@ function processProjectData() {
 // main function after data processing
 function afterProcessData() {
 
-    function render(root) {
+    function render(hierarchy) {
         svg = d3.select("#gantt-container")
             .append("svg")
             .attr("width", w)
@@ -244,7 +244,7 @@ function afterProcessData() {
         _grp = gantt.append("g")
             .attr("id", "task-rectangles")
             .selectAll("g")
-            .data(root.descendants())
+            .data(hierarchy.descendants())
             .join("g")
             .attr("id", d => "grp" + d.id);
 
@@ -252,7 +252,7 @@ function afterProcessData() {
         _grp.append("rect")
             .attr("id", d => "id" + d.id)
             .attr("x", d => timeScale(d.data.Start))
-            .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
+            .attr("y", (d) => heightScale(checkId (d) + 1))
             .attr("width", d => {
                 let _w = timeScale(d.data.Finish) - timeScale(d.data.Start);
                 return _w > 10 ? _w : 10;
@@ -280,7 +280,7 @@ function afterProcessData() {
         _grp.append("rect")
             .attr("id", d => "progress" + d.id)
             .attr("x", d => timeScale(d.data.ActualStart))
-            .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
+            .attr("y", (d) => heightScale(checkId (d) + 1))
             .attr("transform", `translate(0,${progressTopOffset})`)
             .attr("width", 10)
             .attr("height", progressht)
@@ -297,7 +297,7 @@ function afterProcessData() {
 
         _grp.append("rect")
             .attr("x", 0)
-            .attr("y", d => heightScale(queue.indexOf(d) + 1))
+            .attr("y", d => heightScale(checkId (d) + 1))
             .attr("width", w)
             .attr("height", 1)
             .attr("transform", `translate(0,${taskht / 2})`)
@@ -307,7 +307,7 @@ function afterProcessData() {
         _grp.append("text")
             .text(d => /* hasChildren(d.data) ? d.data.TaskName.toUpperCase() : */ d.data.TaskName)
             .attr("x",/* d =>  hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
-            .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
+            .attr("y", (d) => heightScale(checkId (d) + 1))
             .attr("class", "task")
             .attr("transform", `translate(0,${taskNameTopOffset})`)
             .each(function () {
@@ -355,7 +355,6 @@ function afterProcessData() {
                     .each(function () {
                         setTimeout(() => {
                             if (isVisibilityAllowed(this)) {
-                                // console.log("settin");
                                 this.setAttribute("display", "none")
                             }
                         }, duration)
@@ -403,6 +402,22 @@ function afterProcessData() {
             return true;
         }
     }
+
+    function checkId (node){
+        let i = idqueue.indexOf(node.id);
+        let anc = node.ancestors()
+        if (i == -1) {
+            for (var o = 1; o < anc.length; ++o) {
+                let j = idqueue.indexOf(anc[o].id);
+                if (!(j == -1)) {
+                    return j;
+                }
+            }
+        } else {
+            return i;
+        }
+    }
+
     // path points for connection lines
     function ptGenerator(k, outputPts) {
         // [x,y]
@@ -426,20 +441,7 @@ function afterProcessData() {
         let xa = timeScale(a[_typea]);
         // collapsed nodes are not found in queue
         // in that case use parent's position
-        let checkId = (node) => {
-            let i = idqueue.indexOf(node.id);
-            let anc = node.ancestors()
-            if (i == -1) {
-                for (var o = 1; o < anc.length; ++o) {
-                    let j = idqueue.indexOf(anc[o].id);
-                    if (!(j == -1)) {
-                        return j;
-                    }
-                }
-            } else {
-                return i;
-            }
-        }
+
         // console.log(`id ${a.ID} con ${queue[checkId(k[1])].id} -- id ${b.ID} con ${queue[checkId(k[0])].id}`);
         let ya = heightScale(checkId(k[1]) + 1) + offsetY;
         let xb = timeScale(b[_typeb]);
@@ -628,14 +630,17 @@ function afterProcessData() {
         svg.remove();
         updateHeight(queue);
         updateWidth();
+        updateScale(data);
         render(hierarchy);
     })
 
     
     //execute 
+    // hierarchy.children.forEach(d => toggleChildren(d));
     let q = generateDataQueue(hierarchy);
     queue = q[0]
     idqueue = q[1];
+    // hierarchy.children.forEach(d => toggleChildren(d));
     updateHeight(data);
     updateWidth();
     updateScale(data);
