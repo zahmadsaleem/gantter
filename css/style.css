@@ -1,20 +1,21 @@
-#gantt-container{
-    overflow-y: scroll;
-    max-height: 85vh;
-	border-bottom: 2px solid black;
-	background-color: black;
-}
-/**  STYLE 3 */
-#gantt-container::-webkit-scrollbar-track {
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	background-color: #F5F5F5;
+#activity-info  #dependency-container{
+	height: 20vh;
+	max-height: 20vh;
+	overflow-y: scroll;
 }
 
-#gantt-container::-webkit-scrollbar {
-	width: 6px;
-	background-color: #F5F5F5;
+#info-board{
+	flex: 1;
+	height: 100%;
 }
 
-#gantt-container::-webkit-scrollbar-thumb {
-	background-color: #000000;
+#img-container{
+	width: 100%;
+	height: 40%;
+	overflow: hidden;
+}
+
+#activity-info {
+	width: 100%;
+	max-height: 60%;
 }
