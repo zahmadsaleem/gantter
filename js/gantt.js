@@ -700,9 +700,28 @@ function displayTaskInfo(taskObj) {
     for(const key of Object.keys(fields)) {
         document.getElementById(key).innerHTML = fields[key];
     }
-    document.getElementById("dependency-container").innerHTML = ""
-    for (const p of taskObj.dependents) {
+
+    //  delete all children
+    let dependency_list = document.getElementById("dependency-container").children;
+    
+    for (const d of dependency_list) {
+        d.remove();
+    }
+
+    for (const dep of taskObj.dependents) {
         // add info-link, scroll to
-        document.getElementById("dependency-container").innerHTML += `<div><span class="bg-secondary">${getTaskByID(p).TaskName}</span></div>`;
+        // create div, add listener, append child
+        let el = document.createElement("div");
+        el.setAttribute("data-infoId","id" + dep)
+        el.addEventListener("click", (e) => {
+            let r = e.target.getAttribute("data-infoId");
+            if (r == null) {
+                r = e.target.parentElement.getAttribute("data-infoId");
+            }
+            scrollToTask(r);
+        });
+        el.innerHTML = `<span class="bg-secondary">${getTaskByID(dep).TaskName}</span>`;
+        document.getElementById("dependency-container").append(el);
+        
     }
 }
