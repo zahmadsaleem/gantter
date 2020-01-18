@@ -1,3 +1,4 @@
+// #region global variables
 var w,
     h,
     taskht = 15,
@@ -20,99 +21,31 @@ var svg,
     lineGenerator,
     heightScale,
     timeScale;
-
-function updateHeight(data) {
-    let wh = window.innerHeight * 0.85
-    let sh = data.length * (taskht + gap)
-    h = sh > wh ? sh : wh;
-}
-
-function updateWidth() {
-    w = window.innerWidth > 1060 ? window.innerWidth * 0.63 : window.innerWidth * 0.9;
-}
+// #endregion
 
 
-function removeSelection() {
-    d3.selectAll("path.selected").attr("class", "line");
-    d3.selectAll("rect.selected").attr("class", d => hasChildren(d.data) ? "task-parent" : "task-rect");
-}
-
-function toggleChildren(d) {
-    if (d.children) {
-        d._children = d.children;
-        d.children = null;
-    } else if (d._children) {
-        d.children = d._children;
-        d._children = null;
-    }
-}
-
-function hasChildren(d) {
-    if (d.children) {
-        return !d.children.length == 0
-    } else {
-        return !d._children.length == 0
-    }
-}
-
-function getTaskByID(id) {
-    let task = data.filter((d) => d.ID == id);
-    return task ? task[0] : undefined;
-}
-
-// based on preceeding, succeeding events
-function getFuture(d, dependents) {
-    if (!dependents) dependents = [];
-    if (d.dependents.length > 0) {
-        d.dependents.forEach(i => {
-            let j = getTaskByID(i);
-            if (!dependents.includes(j)) {
-                dependents.push(j);
-                getFuture(j, dependents);
-            } else {
-                console.log(`probable loop dependency ${i}`)
-            }
-        });
-        return dependents;
-    } else {
-        return dependents;
-    }
-}
-
-// generate item, index sequence
-function generateDataQueue(root) {
-    var q = [root];
-    var i = [root.id]
-    function m(root, q, i) {
-        if (root.children) {
-            root.children.forEach((d) => {
-                i.push(d.id);
-                q.push(d);
-                m(d, q, i);
-            });
-            return [q, i];
-        } else {
-            return [q, i];
-        }
-    }
-    return m(root, q, i);
-}
+// #region setup data
 
 // TODO : Create options for input
 // either json or csv
-d3.json("./data/convertcsv.json")
-    // d3.json("./data/schedule.json")
+function getData(url) {
+    d3.json(url)
+    // d3.json(url)
     .then(d => {
         // remove spaces from json keys
-        data = JSON.parse(
-            JSON.stringify(d)
-                .replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, ""))
-        );
+        data = cleanJson(d);
     }).then(() => {
         data.forEach(d => d.dependents = []);
         processProjectData();
     });
+}
 
+function cleanJson(jsonData) {
+    return JSON.parse(
+        JSON.stringify(jsonData)
+            .replace(/(?!")(\w|\s)+(?=":)/g, (match) => match.replace(/\s/g, ""))
+    );
+}
 
 // process data
 function processProjectData() {
@@ -195,6 +128,200 @@ function processProjectData() {
 
     afterProcessData();
 };
+
+// main function after data processing
+function afterProcessData() {
+
+    // setting up the data structure
+    var stratify = d3.stratify()
+        .id(d => d.ID)
+        .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
+
+    hierarchy = stratify(data);
+
+    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
+    _flatHierarchy = {};
+
+    hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
+
+    // rebuild connections with hierarchy data
+    connections.map((con, i, arr) => {
+        arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
+    });
+
+    // path generator for dependency links
+    lineGenerator = d3.line()
+        .x((d) => d[0])
+        .y((d) => d[1])
+        .curve(d3.curveStep);
+
+    let isLinksVisible = document.getElementById("isLinksVisible")
+    isLinksVisible.checked = true;
+    isLinksVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.select("#task-connections").attr("display", "none")
+        } else {
+            d3.selectAll("#task-connections").attr("display", "block")
+        }
+    })
+
+    let isProgressVisible = document.getElementById("isProgressVisible")
+    isProgressVisible.checked = true;
+    isProgressVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.selectAll(".task-actual").attr("display", "none");
+        } else {
+            d3.selectAll(".task-actual:not(.hidden)").attr("display", "block");
+        }
+    })
+
+    let isTextVisible = document.getElementById("isTextVisible")
+    isTextVisible.checked = false;
+    isTextVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.selectAll("g text").attr("display", "none");
+        } else {
+            d3.selectAll("g text:not(.hidden)").attr("display", "block");
+        }
+    })
+
+    document.querySelector("#gantt-container").addEventListener("click", removeSelection);
+    window.addEventListener("resize", () => {
+        svg.remove();
+        updateHeight(queue);
+        updateWidth();
+        updateScale(data);
+        render(hierarchy);
+    })
+
+    
+    //execute 
+    // hierarchy.children.forEach(d => toggleChildren(d));
+    let q = generateDataQueue(hierarchy);
+    queue = q[0]
+    idqueue = q[1];
+    // hierarchy.children.forEach(d => toggleChildren(d));
+    updateHeight(data);
+    updateWidth();
+    updateScale(data);
+    render(hierarchy);
+  
+}
+
+
+// #endregion
+
+// #region setup layout
+
+function updateHeight(data) {
+    let wh = window.innerHeight * 0.85
+    let sh = data.length * (taskht + gap)
+    h = sh > wh ? sh : wh;
+}
+
+function updateWidth() {
+    w = window.innerWidth > 1060 ? window.innerWidth * 0.63 : window.innerWidth * 0.9;
+}
+
+function updateScale(data) {
+    // x scale
+    timeScale = d3.scaleTime()
+        .domain([d3.min(data, d => d.Start),
+        d3.max(data, d => d.ActualFinish)])
+        .range([0, w - 50]);
+    // y scale
+    heightScale = d3.scaleLinear()
+        .domain([1, data.length])
+        .range([0, h - 50]);
+
+}
+
+
+// #endregion
+
+
+// #region data utils
+
+function toggleChildren(d) {
+    if (d.children) {
+        d._children = d.children;
+        d.children = null;
+    } else if (d._children) {
+        d.children = d._children;
+        d._children = null;
+    }
+}
+
+function hasChildren(d) {
+    if (d.children) {
+        return !d.children.length == 0
+    } else {
+        return !d._children.length == 0
+    }
+}
+
+function getTaskByID(id) {
+    let task = data.filter((d) => d.ID == id);
+    return task ? task[0] : undefined;
+}
+
+// based on preceeding, succeeding events
+function getFuture(d, dependents) {
+    if (!dependents) dependents = [];
+    if (d.dependents.length > 0) {
+        d.dependents.forEach(i => {
+            let j = getTaskByID(i);
+            if (!dependents.includes(j)) {
+                dependents.push(j);
+                getFuture(j, dependents);
+            } else {
+                console.log(`probable loop dependency ${i}`)
+            }
+        });
+        return dependents;
+    } else {
+        return dependents;
+    }
+}
+
+function checkId (node){
+    let i = idqueue.indexOf(node.id);
+    let anc = node.ancestors()
+    if (i == -1) {
+        for (var o = 1; o < anc.length; ++o) {
+            let j = idqueue.indexOf(anc[o].id);
+            if (!(j == -1)) {
+                return j;
+            }
+        }
+    } else {
+        return i;
+    }
+}
+
+// generate item, index sequence
+function generateDataQueue(root) {
+    var q = [root];
+    var i = [root.id]
+    function m(root, q, i) {
+        if (root.children) {
+            root.children.forEach((d) => {
+                i.push(d.id);
+                q.push(d);
+                m(d, q, i);
+            });
+            return [q, i];
+        } else {
+            return [q, i];
+        }
+    }
+    return m(root, q, i);
+}
+
+// #endregion
+
+
+// #region add elements
 
 function render(hierarchy) {
     // top level container
@@ -333,112 +460,6 @@ function render(hierarchy) {
 
 }
 
-function setCurrentDate(dragPosition){
-    let _d = new Date(timeScale.invert(dragPosition));
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
-}
-
-function setCurrentImage(dragPosition) {
-    let imageRange = d3.scaleLinear()
-        .domain([1, 413])
-        .range(timeScale.range());
-    let imageIndex = Number(imageRange.invert(dragPosition));
-    imageIndex -= imageIndex % 1;
-    document.getElementById("sequence-img").setAttribute("src" , `../assets/sequence/0 (${imageIndex}).jpg`)
-}
-
-function toggleNodes(node) {
-
-    // get node index
-    let descendants = node._descendants;
-    let index = queue.indexOf(node);
-    var childs = node.children;
-    toggleChildren(node);
-
-    let q = generateDataQueue(hierarchy);
-    queue = q[0];
-    idqueue = q[1];
-
-    updateHeight(queue);
-    updateConnections();
-    svg
-        .transition()
-        .duration(duration)
-        .attr("height", h);
-
-
-    if (childs) {
-        descendants.map((d) => {
-            let nodedata = d.data || d;
-            d3.selectAll("#grp" + nodedata.ID + " *")
-                .classed("hidden", true)
-                .each(function () {
-                    setTimeout(() => {
-                        if (isVisibilityAllowed(this)) {
-                            this.setAttribute("display", "none")
-                        }
-                    }, duration)
-                })
-                .transition()
-                .ease(d3.easeCubic)
-                .duration(duration)
-                .attr("y", heightScale(index + 1));
-        });
-        queue.slice(index + 1).map((d, i) => {
-            let nodedata = d.data || d;
-            d3.selectAll("#grp" + nodedata.ID + " *")
-                .transition()
-                .ease(d3.easeCubic)
-                .duration(duration)
-                .attr("y", heightScale(i + index + 2));
-        });
-    } else {
-        queue.map((d, i) => {
-            let nodedata = d.data || d;
-            d3.selectAll("#grp" + nodedata.ID + " *")
-                .classed("hidden", false)
-                .each(function () {
-                    if (isVisibilityAllowed(this)) {
-                        this.setAttribute("display", "block");
-                    }
-                })
-                .transition()
-                .ease(d3.easeCubic)
-                .duration(duration)
-                .attr("y", heightScale(i + 1));
-        });
-    }
-
-}
-
-function isVisibilityAllowed(d) {
-    if (d.id.startsWith("progress")) {
-        return isProgressVisible.checked;
-    } else if (d.classList.contains("task")) {
-        return isTextVisible.checked;
-    } else if (d.id.startsWith("id")) {
-        return true;
-    } else {
-        return true;
-    }
-}
-
-function checkId (node){
-    let i = idqueue.indexOf(node.id);
-    let anc = node.ancestors()
-    if (i == -1) {
-        for (var o = 1; o < anc.length; ++o) {
-            let j = idqueue.indexOf(anc[o].id);
-            if (!(j == -1)) {
-                return j;
-            }
-        }
-    } else {
-        return i;
-    }
-}
-
 // path points for connection lines
 function ptGenerator(k, outputPts) {
     // [x,y]
@@ -489,10 +510,6 @@ function ptGenerator(k, outputPts) {
     ptList = [...pta, ...ptb].sort((a, b) => a[1] - b[1]);
     // console.log(k)
     return outputPts ? lineGenerator(ptList) : ptList;
-}
-
-function checkSelection(id) {
-    return d3.select("#id" + id).attr("class").includes("selected");
 }
 
 function drawConnections() {
@@ -581,97 +598,111 @@ function updateConnections() {
     // 
 }
 
-function updateScale(data) {
-    // x scale
-    timeScale = d3.scaleTime()
-        .domain([d3.min(data, d => d.Start),
-        d3.max(data, d => d.ActualFinish)])
-        .range([0, w - 50]);
-    // y scale
-    heightScale = d3.scaleLinear()
-        .domain([1, data.length])
-        .range([0, h - 50]);
+// #endregion
 
-}
 
-// main function after data processing
-function afterProcessData() {
+// #region interactivity utils
 
-    // setting up the data structure
-    var stratify = d3.stratify()
-        .id(d => d.ID)
-        .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
+function toggleNodes(node) {
 
-    hierarchy = stratify(data);
+    // get node index
+    let descendants = node._descendants;
+    let index = queue.indexOf(node);
+    var childs = node.children;
+    toggleChildren(node);
 
-    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
-    _flatHierarchy = {};
-
-    hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
-
-    // rebuild connections with hierarchy data
-    connections.map((con, i, arr) => {
-        arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
-    });
-
-    // path generator for dependency links
-    lineGenerator = d3.line()
-        .x((d) => d[0])
-        .y((d) => d[1])
-        .curve(d3.curveStep);
-
-    let isLinksVisible = document.getElementById("isLinksVisible")
-    isLinksVisible.checked = true;
-    isLinksVisible.addEventListener("click", function () {
-        if (!this.checked) {
-            d3.select("#task-connections").attr("display", "none")
-        } else {
-            d3.selectAll("#task-connections").attr("display", "block")
-        }
-    })
-
-    let isProgressVisible = document.getElementById("isProgressVisible")
-    isProgressVisible.checked = true;
-    isProgressVisible.addEventListener("click", function () {
-        if (!this.checked) {
-            d3.selectAll(".task-actual").attr("display", "none");
-        } else {
-            d3.selectAll(".task-actual:not(.hidden)").attr("display", "block");
-        }
-    })
-
-    let isTextVisible = document.getElementById("isTextVisible")
-    isTextVisible.checked = false;
-    isTextVisible.addEventListener("click", function () {
-        if (!this.checked) {
-            d3.selectAll("g text").attr("display", "none");
-        } else {
-            d3.selectAll("g text:not(.hidden)").attr("display", "block");
-        }
-    })
-
-    document.querySelector("#gantt-container").addEventListener("click", removeSelection);
-    window.addEventListener("resize", () => {
-        svg.remove();
-        updateHeight(queue);
-        updateWidth();
-        updateScale(data);
-        render(hierarchy);
-    })
-
-    
-    //execute 
-    // hierarchy.children.forEach(d => toggleChildren(d));
     let q = generateDataQueue(hierarchy);
-    queue = q[0]
+    queue = q[0];
     idqueue = q[1];
-    // hierarchy.children.forEach(d => toggleChildren(d));
-    updateHeight(data);
-    updateWidth();
-    updateScale(data);
-    render(hierarchy);
-  
+
+    updateHeight(queue);
+    updateConnections();
+    svg
+        .transition()
+        .duration(duration)
+        .attr("height", h);
+
+
+    if (childs) {
+        descendants.map((d) => {
+            let nodedata = d.data || d;
+            d3.selectAll("#grp" + nodedata.ID + " *")
+                .classed("hidden", true)
+                .each(function () {
+                    setTimeout(() => {
+                        if (isVisibilityAllowed(this)) {
+                            this.setAttribute("display", "none")
+                        }
+                    }, duration)
+                })
+                .transition()
+                .ease(d3.easeCubic)
+                .duration(duration)
+                .attr("y", heightScale(index + 1));
+        });
+        queue.slice(index + 1).map((d, i) => {
+            let nodedata = d.data || d;
+            d3.selectAll("#grp" + nodedata.ID + " *")
+                .transition()
+                .ease(d3.easeCubic)
+                .duration(duration)
+                .attr("y", heightScale(i + index + 2));
+        });
+    } else {
+        queue.map((d, i) => {
+            let nodedata = d.data || d;
+            d3.selectAll("#grp" + nodedata.ID + " *")
+                .classed("hidden", false)
+                .each(function () {
+                    if (isVisibilityAllowed(this)) {
+                        this.setAttribute("display", "block");
+                    }
+                })
+                .transition()
+                .ease(d3.easeCubic)
+                .duration(duration)
+                .attr("y", heightScale(i + 1));
+        });
+    }
+
 }
+
+function setCurrentDate(dragPosition){
+    let _d = new Date(timeScale.invert(dragPosition));
+    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
+}
+
+function setCurrentImage(dragPosition) {
+    let imageRange = d3.scaleLinear()
+        .domain([1, 413])
+        .range(timeScale.range());
+    let imageIndex = Number(imageRange.invert(dragPosition));
+    imageIndex -= imageIndex % 1;
+    document.getElementById("sequence-img").setAttribute("src" , `../assets/sequence/0 (${imageIndex}).jpg`)
+}
+
+function removeSelection() {
+    d3.selectAll("path.selected").attr("class", "line");
+    d3.selectAll("rect.selected").attr("class", d => hasChildren(d.data) ? "task-parent" : "task-rect");
+}
+
+function isVisibilityAllowed(d) {
+    if (d.id.startsWith("progress")) {
+        return isProgressVisible.checked;
+    } else if (d.classList.contains("task")) {
+        return isTextVisible.checked;
+    } else if (d.id.startsWith("id")) {
+        return true;
+    } else {
+        return true;
+    }
+}
+
+function checkSelection(id) {
+    return d3.select("#id" + id).attr("class").includes("selected");
+}
+
 
 function scrollToTask(taskId) {
     document.getElementById("gantt-container")
@@ -681,6 +712,15 @@ function scrollToTask(taskId) {
             left: 0,
             behavior: 'smooth'
         })
+}
+
+function highlightTaskSelection(taskId) {
+    document.getElementById(taskId).classList.toggle("select-blink1");
+    document.getElementById(taskId).classList.toggle("select-blink");
+    setTimeout(() => {
+        document.getElementById(taskId).classList.toggle("select-blink");
+        setTimeout(() => document.getElementById(taskId).classList.toggle("select-blink1"), 1000);
+    }, 1000);
 }
 
 function displayTaskInfo(taskObj) {
@@ -711,7 +751,7 @@ function displayTaskInfo(taskObj) {
     for (const dep of taskObj.dependents) {
         // add info-link, scroll to
         // create div, add listener, append child
-        let el = document.createElement("div");
+        let el = document.createElement("tr");
         el.setAttribute("data-infoId","id" + dep)
         el.addEventListener("click", (e) => {
             let r = e.target.getAttribute("data-infoId");
@@ -719,9 +759,17 @@ function displayTaskInfo(taskObj) {
                 r = e.target.parentElement.getAttribute("data-infoId");
             }
             scrollToTask(r);
+            highlightTaskSelection(r);
         });
-        el.innerHTML = `<span class="bg-secondary">${getTaskByID(dep).TaskName}</span>`;
+        el.innerHTML = `<td>${getTaskByID(dep).TaskName}</td>`;
         document.getElementById("dependency-container").append(el);
         
     }
 }
+
+// #endregion
+
+
+// #region execute
+getData("./data/convertcsv.json");
+// # endregion

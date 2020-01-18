@@ -18,7 +18,7 @@
   <nav class="navbar navbar-dark bg-dark">
     <span class="navbar-brand mb-0 h1">Brown</span>
   </nav>
-  <div class="row w-100 mx-auto">
+  <div class="row w-100 no-gutters">
     <div class="col-lg-8 col-sm-12 ">
       <!-- gantt svg container -->
       <div id="gantt-container"></div>
@@ -41,35 +41,42 @@
       </div>
     </div>
 
-    <div class="col m-0 p-0" id="info-board">
+    <div class="col-lg-4 " id="info-board">
       <div id="img-container">
         <img id="sequence-img" src="/assets/sequence/0 (1).jpg" alt="status-image" class="img-fluid pl-0 p-2">
       </div>
-      <div id="activity-info">
-        <table class="table table-dark">
-          <thead>
+      <div id="activity-info" class="p-2">
+        <table class="table">
+          <thead class="thead-dark">
             <tr>
               <th scope="col" id="info-task-id">Id</th>
-              <th scope="col" colspan="3" id="info-task-name">Task Name</th>
+              <th scope="col" colspan="4" id="info-task-name">Task Name</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <th scope="row">Planned</th>
               <td id="info-pstart">Start</td>
+              <td>-</td>
               <td id="info-pfinish">Finish</td>
               <td id="info-pduration">Duration</td>
             </tr>
             <tr>
               <th scope="row">Actual</th>
               <td id="info-astart">Start</td>
+              <td>-</td>
               <td id="info-afinish">Finish</td>
               <td id="info-aduration"></td>
             </tr>
-            <tr>
-              <td colspan="4">
-                <div id="dependency-container">
-                </div>
+              <thead class="thead-light">
+                <tr>
+                  <th colspan="5">Dependencies</th>
+                </tr>
+              </thead>
+              <td colspan="5">
+                <table class="table" id="dependency-container">
+                  
+                </table>
               </td>
             </tr>
           </tbody>

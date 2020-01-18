@@ -91,3 +91,15 @@ background-color: #F5F5F5;
 #gantt-container::-webkit-scrollbar-thumb {
 background-color: #000000;
 }
+
+.select-blink1{
+  stroke-opacity: 0;
+  stroke: aqua;
+  stroke-width: 2px;
+  transition-property: stroke-opacity;
+  transition-duration: 1s;
+}
+
+.select-blink{
+  stroke-opacity: 1;
+}
