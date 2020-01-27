@@ -21,8 +21,10 @@ var svg,
     lineGenerator,
     heightScale,
     timeScale;
-// #endregion
 
+var linegenOutputPts = false;
+
+// #endregion
 
 // #region setup data
 
@@ -40,6 +42,7 @@ function getData(url) {
     });
 }
 
+// remove spaces from json keys
 function cleanJson(jsonData) {
     return JSON.parse(
         JSON.stringify(jsonData)
@@ -48,6 +51,8 @@ function cleanJson(jsonData) {
 }
 
 // process data
+// TODO: create options object 
+// parse object properties i.e { property: f(value) }
 function processProjectData() {
     data.forEach((item, index, arr) => {
         // convert raw data types
@@ -126,11 +131,12 @@ function processProjectData() {
     // console.log(data);
     // console.log(connections);
 
-    afterProcessData();
+    setupDataStructure();
 };
 
 // main function after data processing
-function afterProcessData() {
+// create necessary data structure eg: tree
+function setupDataStructure() {
 
     // setting up the data structure
     var stratify = d3.stratify()
@@ -155,45 +161,8 @@ function afterProcessData() {
         .y((d) => d[1])
         .curve(d3.curveStep);
 
-    let isLinksVisible = document.getElementById("isLinksVisible")
-    isLinksVisible.checked = true;
-    isLinksVisible.addEventListener("click", function () {
-        if (!this.checked) {
-            d3.select("#task-connections").attr("display", "none")
-        } else {
-            d3.selectAll("#task-connections").attr("display", "block")
-        }
-    })
 
-    let isProgressVisible = document.getElementById("isProgressVisible")
-    isProgressVisible.checked = true;
-    isProgressVisible.addEventListener("click", function () {
-        if (!this.checked) {
-            d3.selectAll(".task-actual").attr("display", "none");
-        } else {
-            d3.selectAll(".task-actual:not(.hidden)").attr("display", "block");
-        }
-    })
-
-    let isTextVisible = document.getElementById("isTextVisible")
-    isTextVisible.checked = false;
-    isTextVisible.addEventListener("click", function () {
-        if (!this.checked) {
-            d3.selectAll("g text").attr("display", "none");
-        } else {
-            d3.selectAll("g text:not(.hidden)").attr("display", "block");
-        }
-    })
-
-    document.querySelector("#gantt-container").addEventListener("click", removeSelection);
-    window.addEventListener("resize", () => {
-        svg.remove();
-        updateHeight(queue);
-        updateWidth();
-        updateScale(data);
-        render(hierarchy);
-    })
-
+    setupEventListeners();
     
     //execute 
     // hierarchy.children.forEach(d => toggleChildren(d));
@@ -207,7 +176,6 @@ function afterProcessData() {
     render(hierarchy);
   
 }
-
 
 // #endregion
 
@@ -238,7 +206,6 @@ function updateScale(data) {
 
 
 // #endregion
-
 
 // #region data utils
 
@@ -286,11 +253,13 @@ function getFuture(d, dependents) {
 
 function checkId (node){
     let i = idqueue.indexOf(node.id);
-    let anc = node.ancestors()
+
+    // if node is collapsed id isnt found in idqueue
     if (i == -1) {
+        let anc = node.ancestors()
         for (var o = 1; o < anc.length; ++o) {
             let j = idqueue.indexOf(anc[o].id);
-            if (!(j == -1)) {
+            if (j != -1) {
                 return j;
             }
         }
@@ -319,7 +288,6 @@ function generateDataQueue(root) {
 }
 
 // #endregion
-
 
 // #region add elements
 
@@ -461,13 +429,14 @@ function render(hierarchy) {
 }
 
 // path points for connection lines
-function ptGenerator(k, outputPts) {
+function ptGenerator(k) {
     // [x,y]
     let offsetX = 3;
     let offsetY = taskht / 2;
-    var ptList = [];
-    var pta = [];
-    var ptb = [];
+    var ptList = [],
+        pta = [],
+        ptb = [];
+    
     let a = k[1].data;// predecessor
     let b = k[0].data;// item
 
@@ -508,8 +477,8 @@ function ptGenerator(k, outputPts) {
     }
 
     ptList = [...pta, ...ptb].sort((a, b) => a[1] - b[1]);
-    // console.log(k)
-    return outputPts ? lineGenerator(ptList) : ptList;
+    //console.log([k,ptList])
+    return linegenOutputPts ? ptList : lineGenerator(ptList) ;
 }
 
 function drawConnections() {
@@ -591,7 +560,8 @@ function updateConnections() {
         .transition()
         .duration(duration)
         .attr("d", function (d) {
-            let ptList = ptGenerator(d, false);
+            linegenOutputPts = true;
+            let ptList = ptGenerator(d);
             return lineGenerator(ptList);
         })
 
@@ -599,7 +569,6 @@ function updateConnections() {
 }
 
 // #endregion
-
 
 // #region interactivity utils
 
@@ -703,7 +672,6 @@ function checkSelection(id) {
     return d3.select("#id" + id).attr("class").includes("selected");
 }
 
-
 function scrollToTask(taskId) {
     document.getElementById("gantt-container")
         .scrollTo({
@@ -767,9 +735,55 @@ function displayTaskInfo(taskObj) {
     }
 }
 
+function setupEventListeners() {
+    let isLinksVisible = document.getElementById("isLinksVisible")
+    isLinksVisible.checked = true;
+    isLinksVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.select("#task-connections").attr("display", "none")
+        } else {
+            d3.selectAll("#task-connections").attr("display", "block")
+        }
+    })
+
+    let isProgressVisible = document.getElementById("isProgressVisible")
+    isProgressVisible.checked = true;
+    isProgressVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.selectAll(".task-actual").attr("display", "none");
+        } else {
+            d3.selectAll(".task-actual:not(.hidden)").attr("display", "block");
+        }
+    })
+
+    // text visibility check box
+    let isTextVisible = document.getElementById("isTextVisible")
+    isTextVisible.checked = false;
+    isTextVisible.addEventListener("click", function () {
+        if (!this.checked) {
+            d3.selectAll("g text").attr("display", "none");
+        } else {
+            d3.selectAll("g text:not(.hidden)").attr("display", "block");
+        }
+    })
+
+    // deselect tasks
+    document.querySelector("#gantt-container").addEventListener("click", removeSelection);
+
+    // resize
+    window.addEventListener("resize", () => {
+        svg.remove();
+        updateHeight(queue);
+        updateWidth();
+        updateScale(data);
+        render(hierarchy);
+    })
+}
+
 // #endregion
 
-
 // #region execute
+
 getData("./data/convertcsv.json");
-// # endregion
+
+// #endregion
