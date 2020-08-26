@@ -2,90 +2,88 @@
 <html>
 
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>Gantter</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.12.0/d3.min.js"></script>
-  <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
-  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
-  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-  <link rel="stylesheet" href="./css/gantt-style.css">
-  <link rel="stylesheet" href="./css/style.css">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width">
+    <title>Gantter</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/5.12.0/d3.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="./css/gantt-style.css">
+    <link rel="stylesheet" href="./css/style.css">
 </head>
 
 <body>
-  <nav class="navbar navbar-dark bg-dark">
+<nav class="navbar navbar-dark bg-dark">
     <span class="navbar-brand mb-0 h1">Brown</span>
-  </nav>
-  <div class="row w-100 no-gutters">
+</nav>
+<div class="row w-100 no-gutters">
     <div class="col-lg-8 col-sm-12 ">
-      <!-- gantt svg container -->
-      <div id="gantt-container"></div>
+        <!-- gantt svg container -->
+        <div id="gantt-container"></div>
 
-      <!-- inline form -->
-      <div class="p-2">
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" id="isLinksVisible" value="option1">
-          <label class="form-check-label" for="inlineCheckbox1">Connections</label>
+        <!-- inline form -->
+        <div class="p-2">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="isLinksVisible" value="option1">
+                <label class="form-check-label" for="isLinksVisible">Connections</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="isProgressVisible" value="option2">
+                <label class="form-check-label" for="isProgressVisible">Actual</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="checkbox" id="isTextVisible" value="option2">
+                <label class="form-check-label" for="isTextVisible">Text</label>
+            </div>
+            <span id="current-date" class="h5 float-right"></span>
         </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" id="isProgressVisible" value="option2">
-          <label class="form-check-label" for="inlineCheckbox2">Actual</label>
-        </div>
-        <div class="form-check form-check-inline">
-          <input class="form-check-input" type="checkbox" id="isTextVisible" value="option2">
-          <label class="form-check-label" for="inlineCheckbox2">Text</label>
-        </div>
-        <span id="current-date" class="h5 float-right"></span>
-      </div>
     </div>
 
     <div class="col-lg-4 " id="info-board">
-      <div id="img-container">
-        <img id="sequence-img" src="/assets/sequence/0 (1).jpg" alt="status-image" class="img-fluid pl-0 p-2">
-      </div>
-      <div id="activity-info" class="p-2">
-        <table class="table">
-          <thead class="thead-dark">
-            <tr>
-              <th scope="col" id="info-task-id">Id</th>
-              <th scope="col" colspan="4" id="info-task-name">Task Name</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <th scope="row">Planned</th>
-              <td id="info-pstart">Start</td>
-              <td>-</td>
-              <td id="info-pfinish">Finish</td>
-              <td id="info-pduration">Duration</td>
-            </tr>
-            <tr>
-              <th scope="row">Actual</th>
-              <td id="info-astart">Start</td>
-              <td>-</td>
-              <td id="info-afinish">Finish</td>
-              <td id="info-aduration"></td>
-            </tr>
-              <thead class="thead-light">
+        <div id="img-container">
+            <img id="sequence-img" src="./assets/sequence/0 (1).jpg" alt="status-image" class="img-fluid pl-0 p-2">
+        </div>
+        <div id="activity-info" class="p-2">
+            <table class="table">
+                <thead class="thead-dark">
                 <tr>
-                  <th colspan="5">Dependencies</th>
+                    <th scope="col" id="info-task-id">Id</th>
+                    <th scope="col" colspan="4" id="info-task-name">Task Name</th>
                 </tr>
-              </thead>
-              <td colspan="5">
-                <table class="table" id="dependency-container">
-                  
-                </table>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div>
+                </thead>
+                <tbody>
+                <tr>
+                    <th scope="row">Planned</th>
+                    <td id="info-pstart">Start</td>
+                    <td>-</td>
+                    <td id="info-pfinish">Finish</td>
+                    <td id="info-pduration">Duration</td>
+                </tr>
+                <tr>
+                    <th scope="row">Actual</th>
+                    <td id="info-astart">Start</td>
+                    <td>-</td>
+                    <td id="info-afinish">Finish</td>
+                    <td id="info-aduration"></td>
+                </tr>
+                </tbody>
+                <thead class="thead-light">
+                <tr>
+                    <th colspan="5">Dependencies</th>
+                </tr>
+                </thead>
+            </table>
+            <table class="table" id="dependency-container">
 
-  <script src="./js/gantt.js"></script>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+<script src="./js/gantt.js"></script>
 </body>
 
 </html>

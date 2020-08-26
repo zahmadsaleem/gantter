@@ -1,5 +1,5 @@
 #activity-info  #dependency-container{
-	max-height: calc(30vh -50px);
+	max-height: calc(30vh - 50px);
 	overflow-y: scroll;
 }
 

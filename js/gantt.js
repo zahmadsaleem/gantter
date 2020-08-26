@@ -1,19 +1,15 @@
-// #region global variables
-var w,
+let w,
     h,
     taskht = 15,
     progressht = 8,
     gap = 4,
     progressTopOffset = (taskht - progressht) / 2,
     taskNameTopOffset = taskht / 3,
-    IdTopOffset = taskht / 3,
     duration = 1000;
 
-var svg,
+let svg,
     data,
-    group,
     gantt,
-    tree,
     hierarchy,
     connections = [],
     queue = [],
@@ -22,21 +18,17 @@ var svg,
     heightScale,
     timeScale;
 
-var linegenOutputPts = false;
-
-// #endregion
-
-// #region setup data
+let linegenOutputPts = false;
 
 // TODO : Create options for input
 // either json or csv
 function getData(url) {
     d3.json(url)
-    // d3.json(url)
-    .then(d => {
-        // remove spaces from json keys
-        data = cleanJson(d);
-    }).then(() => {
+        // d3.json(url)
+        .then(d => {
+            // remove spaces from json keys
+            data = cleanJson(d);
+        }).then(() => {
         data.forEach(d => d.dependents = []);
         processProjectData();
     });
@@ -54,64 +46,59 @@ function cleanJson(jsonData) {
 // TODO: create options object 
 // parse object properties i.e { property: f(value) }
 function processProjectData() {
-    data.forEach((item, index, arr) => {
-        // convert raw data types
-        let _dur = item.Duration.match(/^\d+/g);
-        item.Duration = _dur ? +_dur[0] : 1;
-        item.Finish = Date.parse(item.Finish);
-        item.Start = Date.parse(item.Start);
-        item.ID = String(item.ID);
-        item.ActualStart = Date.parse(item.ActualStart);
-        item.ActualFinish = Date.parse(item.ActualFinish);
+    function processDependencies(item, arr) {
+        let preArray = [];
+        let _preArray = function (t) {
+            let sc = t.search(/;/);
+            let c = t.search(/,/);
+            return sc === -1 ? t.split(",") : t.split(";");
+        }(item.Predecessors.replace(/\s/g, ""));
 
-        // process dependencies
-        if (item.Predecessors) {
-            var preArray = [];
-            var _preArray = function (t) {
-                let sc = t.search(/;/);
-                let c = t.search(/,/);
-                return sc == -1 ? t.split(",") : t.split(";");
-            }(item.Predecessors.replace(/\s/g, ""));
-            // NOTE : delimiters could be different
-            _preArray.forEach((link) => {
-                var preObject = {};
-                const rePre = /^\d+/g;
-                const reType = /SS|FS|FF|SF/g;
-                const reSign = /\+|-/g;
-                const reAdd = /\d+(?=d)/g;
-
-                // eg : "119FS+50 days"
-                // could be +5d, +5 days
-                var _pre = rePre.exec(link);
-                if (_pre) {
-                    preObject.pre = _pre[0];
-                    var _type = reType.exec(link);
-                    _type ? preObject.type = _type[0] : preObject.type = undefined;
-                    _sign = reSign.exec(link);
-                    if (_sign) {
-                        preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
-                    } else {
-                        preObject.addition = 0;
-                    }
-                    connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
-                } else {
-                    preObject.pre = undefined;
-                    preObject.type = undefined;
-                    preObject.addition = 0;
-                }
-                preArray.push(preObject);
-                arr[+preObject.pre - 1].dependents.push(item.ID);
-
-            });
-            item.preArray = preArray;
+        function addConnections(_pre, link) {
+            let preObject = {
+                pre: null,
+                type: null,
+                addition: 0,
+            };
+            const reType = /SS|FS|FF|SF/g;
+            const reSign = /[+-]/g;
+            const reAdd = /\d+(?=d)/g;
+            preObject.pre = _pre[0];
+            let _type = reType.exec(link);
+            _type ? preObject.type = _type[0] : preObject.type = undefined;
+            let _sign = reSign.exec(link);
+            if (_sign) {
+                preObject.addition = eval(_sign[0] + reAdd.exec(link)[0]);
+            } else {
+                preObject.addition = 0;
+            }
+            connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
+            return preObject
         }
 
-        // convert indent to parent<>child list
+// NOTE : delimiters could be different
+        _preArray.forEach((link) => {
+            let predecessor;
+            const rePre = /^\d+/g;
+            // eg : "119FS+50 days"
+            // could be +5d, +5 days
+            const _pre = rePre.exec(link);
+            if (_pre) {
+                predecessor = addConnections(_pre, link);
+            }
+            if (predecessor) preArray.push(predecessor);
+            arr[+predecessor.pre - 1].dependents.push(item.ID);
+
+        });
+        item.preArray = preArray;
+    }
+
+    function convertIndentsToParentChild(item, index, arr) {
         let _s = item.TaskName.match(/^\s+\w/g);
         _s ? item.indent = _s[0].search(/\S/g) / 4 : item.indent = 0;
         item.TaskName = item.TaskName.trim()
         item.children = [];
-        var _parent;
+        let _parent;
         if (index > 0) {
             if (item.indent > arr[index - 1].indent) {
                 _parent = arr[index - 1].parents.concat(arr[index - 1].ID);
@@ -126,27 +113,49 @@ function processProjectData() {
         } else {
             item.parents = [];
         }
+    }
+
+    data.forEach((item, index, arr) => {
+        // convert raw data types
+        let _dur = item.Duration.match(/^\d+/g);
+        item.Duration = _dur ? +_dur[0] : 1;
+        item.Finish = Date.parse(item.Finish);
+        item.Start = Date.parse(item.Start);
+        item.ID = String(item.ID);
+        item.ActualStart = Date.parse(item.ActualStart);
+        item.ActualFinish = Date.parse(item.ActualFinish);
+
+
+        // convert indent to parent<>child list
+        convertIndentsToParentChild(item, index, arr);
     });
+
+    data.forEach((item, index, arr) => {
+        // process dependencies
+        if (item.Predecessors) {
+            processDependencies(item, arr);
+        }
+    })
 
     // console.log(data);
     // console.log(connections);
 
     setupDataStructure();
-};
+}
 
 // main function after data processing
 // create necessary data structure eg: tree
 function setupDataStructure() {
 
     // setting up the data structure
-    var stratify = d3.stratify()
+    const stratify = d3.stratify()
         .id(d => d.ID)
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
 
     hierarchy = stratify(data);
 
     hierarchy.each((d) => d._descendants = d.descendants().slice(1));
-    _flatHierarchy = {};
+    let _flatHierarchy = {};
 
     hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
 
@@ -163,7 +172,7 @@ function setupDataStructure() {
 
 
     setupEventListeners();
-    
+
     //execute 
     // hierarchy.children.forEach(d => toggleChildren(d));
     let q = generateDataQueue(hierarchy);
@@ -174,7 +183,7 @@ function setupDataStructure() {
     updateWidth();
     updateScale(data);
     render(hierarchy);
-  
+
 }
 
 // #endregion
@@ -195,7 +204,7 @@ function updateScale(data) {
     // x scale
     timeScale = d3.scaleTime()
         .domain([d3.min(data, d => d.Start),
-        d3.max(data, d => d.ActualFinish)])
+            d3.max(data, d => d.ActualFinish)])
         .range([0, w - 50]);
     // y scale
     heightScale = d3.scaleLinear()
@@ -221,18 +230,18 @@ function toggleChildren(d) {
 
 function hasChildren(d) {
     if (d.children) {
-        return !d.children.length == 0
+        return d.children.length !== 0
     } else {
-        return !d._children.length == 0
+        return d._children.length !== 0
     }
 }
 
 function getTaskByID(id) {
-    let task = data.filter((d) => d.ID == id);
+    let task = data.filter((d) => d.ID === id);
     return task ? task[0] : undefined;
 }
 
-// based on preceeding, succeeding events
+// based on preceding, succeeding events
 function getFuture(d, dependents) {
     if (!dependents) dependents = [];
     if (d.dependents.length > 0) {
@@ -251,15 +260,15 @@ function getFuture(d, dependents) {
     }
 }
 
-function checkId (node){
+function checkId(node) {
     let i = idqueue.indexOf(node.id);
 
-    // if node is collapsed id isnt found in idqueue
-    if (i == -1) {
+    // if node is collapsed id isn't found in idqueue
+    if (i === -1) {
         let anc = node.ancestors()
         for (var o = 1; o < anc.length; ++o) {
             let j = idqueue.indexOf(anc[o].id);
-            if (j != -1) {
+            if (j !== -1) {
                 return j;
             }
         }
@@ -270,8 +279,9 @@ function checkId (node){
 
 // generate item, index sequence
 function generateDataQueue(root) {
-    var q = [root];
-    var i = [root.id]
+    const q = [root];
+    const i = [root.id];
+
     function m(root, q, i) {
         if (root.children) {
             root.children.forEach((d) => {
@@ -284,6 +294,7 @@ function generateDataQueue(root) {
             return [q, i];
         }
     }
+
     return m(root, q, i);
 }
 
@@ -315,30 +326,30 @@ function render(hierarchy) {
         .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
         .call(d3.drag()
             .on("drag", function () {
-                const range = timeScale.range();
-                let checkMouseX = pos => {
-                    if (pos < range[1] && pos > range[0]) {
-                        dragPosition = pos;
-                        return pos;
-                    } else {
-                        return dragPosition;
+                    const range = timeScale.range();
+                    let checkMouseX = pos => {
+                        if (pos < range[1] && pos > range[0]) {
+                            dragPosition = pos;
+                            return pos;
+                        } else {
+                            return dragPosition;
+                        }
                     }
-                }
-                d3.select(this)
-                    .attr("d", () => {
-                        let ptx = checkMouseX(d3.event.x);
-                        return lineGenerator([[ptx, 0], [ptx, h]])
-                    });
+                    d3.select(this)
+                        .attr("d", () => {
+                            let ptx = checkMouseX(d3.event.x);
+                            return lineGenerator([[ptx, 0], [ptx, h]])
+                        });
 
-                // emit event? add listener to image, date
-                setCurrentDate(dragPosition);
-                setCurrentImage(dragPosition);
-                // change image
-            }
+                    // emit event? add listener to image, date
+                    setCurrentDate(dragPosition);
+                    setCurrentImage(dragPosition);
+                    // change image
+                }
             ));
 
     // rectangles
-    _grp = gantt.append("g")
+    let _grp = gantt.append("g")
         .attr("id", "task-rectangles")
         .selectAll("g")
         .data(hierarchy.descendants())
@@ -349,7 +360,7 @@ function render(hierarchy) {
     _grp.append("rect")
         .attr("id", d => "id" + d.id)
         .attr("x", d => timeScale(d.data.Start))
-        .attr("y", (d) => heightScale(checkId (d) + 1))
+        .attr("y", (d) => heightScale(checkId(d) + 1))
         .attr("width", d => {
             let _w = timeScale(d.data.Finish) - timeScale(d.data.Start);
             return _w > 10 ? _w : 10;
@@ -378,7 +389,7 @@ function render(hierarchy) {
     _grp.append("rect")
         .attr("id", d => "progress" + d.id)
         .attr("x", d => timeScale(d.data.ActualStart))
-        .attr("y", (d) => heightScale(checkId (d) + 1))
+        .attr("y", (d) => heightScale(checkId(d) + 1))
         .attr("transform", `translate(0,${progressTopOffset})`)
         .attr("width", 10)
         .attr("height", progressht)
@@ -395,7 +406,7 @@ function render(hierarchy) {
 
     _grp.append("rect")
         .attr("x", 0)
-        .attr("y", d => heightScale(checkId (d) + 1))
+        .attr("y", d => heightScale(checkId(d) + 1))
         .attr("width", w)
         .attr("height", 1)
         .attr("transform", `translate(0,${taskht / 2})`)
@@ -405,7 +416,7 @@ function render(hierarchy) {
     _grp.append("text")
         .text(d => /* hasChildren(d.data) ? d.data.TaskName.toUpperCase() : */ d.data.TaskName)
         .attr("x",/* d =>  hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
-        .attr("y", (d) => heightScale(checkId (d) + 1))
+        .attr("y", (d) => heightScale(checkId(d) + 1))
         .attr("class", "task")
         .attr("transform", `translate(0,${taskNameTopOffset})`)
         .each(function () {
@@ -421,10 +432,10 @@ function render(hierarchy) {
         .attr("y", (d) => heightScale(queue.indexOf(d) + 1))
         .attr("class", "task")
         .attr("transform", `translate(0,${IdTopOffset})`); */
-    
-        setCurrentDate(dragPosition);
-        setCurrentImage(dragPosition);
-        displayTaskInfo(data[0]);
+
+    setCurrentDate(dragPosition);
+    setCurrentImage(dragPosition);
+    displayTaskInfo(data[0]);
 
 }
 
@@ -433,20 +444,21 @@ function ptGenerator(k) {
     // [x,y]
     let offsetX = 3;
     let offsetY = taskht / 2;
-    var ptList = [],
+    let ptList,
         pta = [],
         ptb = [];
-    
+
     let a = k[1].data;// predecessor
     let b = k[0].data;// item
 
+    let _typea, _typeb;
     if (k[2]) {
         let _type = k[2].split("")
-        var _typea = _type[1] == "S" ? "Start" : "Finish";
-        var _typeb = _type[0] == "S" ? "Start" : "Finish";
+        _typea = _type[1] === "S" ? "Start" : "Finish";
+        _typeb = _type[0] === "S" ? "Start" : "Finish";
     } else {
-        var _typea = "Finish";
-        var _typeb = "Start";
+        _typea = "Finish";
+        _typeb = "Start";
     }
 
     let xa = timeScale(a[_typea]);
@@ -457,28 +469,28 @@ function ptGenerator(k) {
     let ya = heightScale(checkId(k[1]) + 1) + offsetY;
     let xb = timeScale(b[_typeb]);
     let yb = heightScale(checkId(k[0]) + 1) + offsetY;
-    let sign = +a.ID > +b.ID ? - 1 : 1;// prdecessor id > item id 
+    let sign = +a.ID > +b.ID ? -1 : 1;// predecessor id > item id
     let factor = (offsetY + gap / 3) * sign;
-    if (_typea == "Start") {
+    if (_typea === "Start") {
         pta.push([xa - offsetX, ya]);
         pta.push([xa - offsetX, ya + factor]);
 
-    } else if (_typea == "Finish") {
+    } else if (_typea === "Finish") {
         pta.push([xa + offsetX, ya]);
         pta.push([xa + offsetX, ya + factor]);
     }
 
-    if (_typeb == "Start") {
+    if (_typeb === "Start") {
         ptb.push([xb - offsetX, yb]);
         ptb.push([xb - offsetX, yb + factor * -1]);
-    } else if (_typeb == "Finish") {
+    } else if (_typeb === "Finish") {
         ptb.push([xb + offsetX, yb]);
         ptb.push([xb + offsetX, yb + factor * -1]);
     }
 
     ptList = [...pta, ...ptb].sort((a, b) => a[1] - b[1]);
     //console.log([k,ptList])
-    return linegenOutputPts ? ptList : lineGenerator(ptList) ;
+    return linegenOutputPts ? ptList : lineGenerator(ptList);
 }
 
 function drawConnections() {
@@ -539,7 +551,9 @@ function updateConnections() {
             d3.select(id).attr("class", "line filtered");
         } else {
             d3.select(id).attr("class", "line")
-                .attr("display", function () { setTimeout(() => this.removeAttribute("display"), duration / 2) });
+                .attr("display", function () {
+                    setTimeout(() => this.removeAttribute("display"), duration / 2)
+                });
         } // toggle filtered class 
 
         return val;
@@ -577,7 +591,7 @@ function toggleNodes(node) {
     // get node index
     let descendants = node._descendants;
     let index = queue.indexOf(node);
-    var childs = node.children;
+    const childs = node.children;
     toggleChildren(node);
 
     let q = generateDataQueue(hierarchy);
@@ -636,9 +650,9 @@ function toggleNodes(node) {
 
 }
 
-function setCurrentDate(dragPosition){
+function setCurrentDate(dragPosition) {
     let _d = new Date(timeScale.invert(dragPosition));
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = {year: 'numeric', month: 'long', day: 'numeric'};
     document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
 }
 
@@ -648,7 +662,7 @@ function setCurrentImage(dragPosition) {
         .range(timeScale.range());
     let imageIndex = Number(imageRange.invert(dragPosition));
     imageIndex -= imageIndex % 1;
-    document.getElementById("sequence-img").setAttribute("src" , `../assets/sequence/0 (${imageIndex}).jpg`)
+    document.getElementById("sequence-img").setAttribute("src", `./assets/sequence/0 (${imageIndex}).jpg`)
 }
 
 function removeSelection() {
@@ -692,9 +706,9 @@ function highlightTaskSelection(taskId) {
 }
 
 function displayTaskInfo(taskObj) {
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
+    const options = {year: 'numeric', month: 'long', day: 'numeric'};
 
-    var fields = {
+    const fields = {
         "info-task-id": taskObj.ID,
         "info-task-name": taskObj.TaskName,
         "info-pstart": new Date(taskObj.Start).toLocaleDateString('en-US', options),
@@ -705,13 +719,13 @@ function displayTaskInfo(taskObj) {
         // "info-aduration": taskObj.TaskName,
     };
 
-    for(const key of Object.keys(fields)) {
+    for (const key of Object.keys(fields)) {
         document.getElementById(key).innerHTML = fields[key];
     }
 
     //  delete all children
     let dependency_list = document.getElementById("dependency-container").children;
-    
+
     for (const d of dependency_list) {
         d.remove();
     }
@@ -720,7 +734,7 @@ function displayTaskInfo(taskObj) {
         // add info-link, scroll to
         // create div, add listener, append child
         let el = document.createElement("tr");
-        el.setAttribute("data-infoId","id" + dep)
+        el.setAttribute("data-infoId", "id" + dep)
         el.addEventListener("click", (e) => {
             let r = e.target.getAttribute("data-infoId");
             if (r == null) {
@@ -731,7 +745,7 @@ function displayTaskInfo(taskObj) {
         });
         el.innerHTML = `<td>${getTaskByID(dep).TaskName}</td>`;
         document.getElementById("dependency-container").append(el);
-        
+
     }
 }
 

@@ -1,10 +1,10 @@
 document.addEventListener("dataloaded", dgraph);
 
 function dgraph() {
-    var width = 800;
-    var height = 2000;
+    const width = 800;
+    const height = 2000;
 
-    var svg1 = d3.select("body")
+    const svg1 = d3.select("body")
         .append("svg")
         .attr("width", width)
         .attr("height", height)
@@ -21,7 +21,7 @@ function dgraph() {
         .force("charge", d3.forceManyBody())
         .force("center", d3.forceCenter(width / 2, height / 2));
 
-    drag = simulation => {
+    let drag = simulation => {
 
         function dragstarted(d) {
             if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -63,13 +63,6 @@ function dgraph() {
         .join("circle")
         .attr("r", d => Math.sqrt(d.Duration))
         .call(drag(simulation));
-    // node.append("title")
-    //     .text(d => d.ID);
-
-    // var lables = node.append("text")
-    //     .text(d => d.TaskName)
-    //     .attr('x', 6)
-    //     .attr('y', 3);
 
     simulation.on("tick", () => {
         link
