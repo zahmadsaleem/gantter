@@ -1,24 +1,24 @@
-let w,
-    h,
-    taskht = 15,
-    progressht = 8,
-    gap = 4,
-    progressTopOffset = (taskht - progressht) / 2,
-    taskNameTopOffset = taskht / 3,
-    duration = 1000;
+let W,
+    H,
+    TASK_HT = 15,
+    PROGRESS_HT = 8,
+    GAP = 4,
+    PROGRESS_TOP_OFFSET = (TASK_HT - PROGRESS_HT) / 2,
+    TASK_NAME_TOP_OFFSET = TASK_HT / 3,
+    DURATION = 1000;
 
-let svg,
-    data,
-    gantt,
-    hierarchy,
-    connections = [],
-    queue = [],
-    idqueue = [],
-    lineGenerator,
-    heightScale,
-    timeScale;
+let SVG,
+    DATA,
+    GANTT,
+    HIERARCHY,
+    CONNECTIONS = [],
+    QUEUE = [],
+    ID_QUEUE = [],
+    LINE_GENERATOR,
+    HEIGHT_SCALE,
+    TIME_SCALE;
 
-let linegenOutputPts = false;
+let LINE_GEN_OUTPUT_POINTS = false;
 
 // TODO : Create options for input
 // either json or csv
@@ -27,9 +27,9 @@ function getData(url) {
         // d3.json(url)
         .then(d => {
             // remove spaces from json keys
-            data = cleanJson(d);
+            DATA = cleanJson(d);
         }).then(() => {
-        data.forEach(d => d.dependents = []);
+        DATA.forEach(d => d.dependents = []);
         processProjectData();
     });
 }
@@ -75,7 +75,7 @@ function processProjectData() {
             } else {
                 preObject.addition = 0;
             }
-            connections.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
+            CONNECTIONS.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
             return preObject
         }
 
@@ -132,12 +132,9 @@ function processProjectData() {
         convertIndentsToParentChild(item, index, arr);
     }
 
-    data.forEach(convertRawToObjects);
+    DATA.forEach(convertRawToObjects);
 
-    data.forEach(processDependencies);
-
-    // console.log(data);
-    // console.log(connections);
+    DATA.forEach(processDependencies);
 
     setupDataStructure();
 }
@@ -151,20 +148,20 @@ function setupDataStructure() {
         .id(d => d.ID)
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
 
-    hierarchy = stratify(data);
+    HIERARCHY = stratify(DATA);
 
-    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
+    HIERARCHY.each((d) => d._descendants = d.descendants().slice(1));
     let _flatHierarchy = {};
 
-    hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
+    HIERARCHY.descendants().forEach((d) => _flatHierarchy[d.id] = d);
 
     // rebuild connections with hierarchy data
-    connections.map((con, i, arr) => {
+    CONNECTIONS.map((con, i, arr) => {
         arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
     });
 
     // path generator for dependency links
-    lineGenerator = d3.line()
+    LINE_GENERATOR = d3.line()
         .x((d) => d[0])
         .y((d) => d[1])
         .curve(d3.curveStep);
@@ -172,39 +169,38 @@ function setupDataStructure() {
 
     setupEventListeners();
 
-    //execute 
-    // hierarchy.children.forEach(d => toggleChildren(d));
-    let q = generateDataQueue(hierarchy);
-    queue = q[0]
-    idqueue = q[1];
-    // hierarchy.children.forEach(d => toggleChildren(d));
-    updateHeight(data);
+    //execute
+    let q = generateDataQueue(HIERARCHY);
+    QUEUE = q[0]
+    ID_QUEUE = q[1];
+
+    updateHeight(DATA);
     updateWidth();
-    updateScale(data);
-    render(hierarchy);
+    updateScale(DATA);
+    render(HIERARCHY);
 
 }
 
 function updateHeight(data) {
     let wh = window.innerHeight * 0.85
-    let sh = data.length * (taskht + gap)
-    h = sh > wh ? sh : wh;
+    let sh = data.length * (TASK_HT + GAP)
+    H = sh > wh ? sh : wh;
 }
 
 function updateWidth() {
-    w = window.innerWidth > 1060 ? window.innerWidth * 0.63 : window.innerWidth * 0.9;
+    W = window.innerWidth > 1060 ? window.innerWidth * 0.63 : window.innerWidth * 0.9;
 }
 
 function updateScale(data) {
     // x scale
-    timeScale = d3.scaleTime()
+    TIME_SCALE = d3.scaleTime()
         .domain([d3.min(data, d => d.Start),
             d3.max(data, d => d.ActualFinish)])
-        .range([0, w - 50]);
+        .range([0, W - 50]);
     // y scale
-    heightScale = d3.scaleLinear()
+    HEIGHT_SCALE = d3.scaleLinear()
         .domain([1, data.length])
-        .range([0, h - 50]);
+        .range([0, H - 50]);
 
 }
 
@@ -227,7 +223,7 @@ function hasChildren(d) {
 }
 
 function getTaskByID(id) {
-    let task = data.filter((d) => d.ID === id);
+    let task = DATA.filter((d) => d.ID === id);
     return task ? task[0] : undefined;
 }
 
@@ -251,13 +247,13 @@ function getFuture(d, dependents) {
 }
 
 function checkId(node) {
-    let i = idqueue.indexOf(node.id);
+    let i = ID_QUEUE.indexOf(node.id);
 
     // if node is collapsed id isn't found in idqueue
     if (i === -1) {
         let anc = node.ancestors()
         for (let o = 1; o < anc.length; ++o) {
-            let j = idqueue.indexOf(anc[o].id);
+            let j = ID_QUEUE.indexOf(anc[o].id);
             if (j !== -1) {
                 return j;
             }
@@ -294,7 +290,7 @@ function generateDataQueue(root) {
 
 function onDragDateSelector(dragPosition) {
     return function () {
-        const range = timeScale.range();
+        const range = TIME_SCALE.range();
         let checkMouseX = pos => {
             if (pos < range[1] && pos > range[0]) {
                 dragPosition = pos;
@@ -306,7 +302,7 @@ function onDragDateSelector(dragPosition) {
         d3.select(this)
             .attr("d", () => {
                 let ptx = checkMouseX(d3.event.x);
-                return lineGenerator([[ptx, 0], [ptx, h]])
+                return LINE_GENERATOR([[ptx, 0], [ptx, H]])
             });
 
         // emit event? add listener to image, date
@@ -318,32 +314,32 @@ function onDragDateSelector(dragPosition) {
 
 function render(hierarchy) {
     // top level container
-    svg = d3.select("#gantt-container")
+    SVG = d3.select("#gantt-container")
         .append("svg")
-        .attr("width", w)
-        .attr("height", h)
+        .attr("width", W)
+        .attr("height", H)
         .attr("class", "svg")
         .attr("overflow", "scroll");
 
     // time slider - behind  everything
-    let dragPosition = d3.mean(timeScale.range());
+    let dragPosition = d3.mean(TIME_SCALE.range());
 
     // main container for gantt chart
-    gantt = svg.append("g")
+    GANTT = SVG.append("g")
         .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
 
     drawConnections();
 
-    gantt.append("path")
+    GANTT.append("path")
         .attr("id", "date-selector")
-        .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
+        .attr("d", LINE_GENERATOR([[dragPosition, 0], [dragPosition, H]]))
         .call(d3.drag()
             .on("drag", onDragDateSelector(dragPosition)
             ));
 
     // rectangles
-    let _grp = gantt.append("g")
+    let _grp = GANTT.append("g")
         .attr("id", "task-rectangles")
         .selectAll("g")
         .data(hierarchy.descendants())
@@ -353,13 +349,13 @@ function render(hierarchy) {
     //append to group
     _grp.append("rect")
         .attr("id", d => "id" + d.id)
-        .attr("x", d => timeScale(d.data.Start))
-        .attr("y", (d) => heightScale(checkId(d) + 1))
+        .attr("x", d => TIME_SCALE(d.data.Start))
+        .attr("y", (d) => HEIGHT_SCALE(checkId(d) + 1))
         .attr("width", d => {
-            let _w = timeScale(d.data.Finish) - timeScale(d.data.Start);
+            let _w = TIME_SCALE(d.data.Finish) - TIME_SCALE(d.data.Start);
             return _w > 10 ? _w : 10;
         })
-        .attr("height", taskht)
+        .attr("height", TASK_HT)
         .attr("rx", 2)
         .attr("ry", 2)
         // .attr("opacity", 0.5)
@@ -382,37 +378,37 @@ function render(hierarchy) {
     // actual time rectangles
     _grp.append("rect")
         .attr("id", d => "progress" + d.id)
-        .attr("x", d => timeScale(d.data.ActualStart))
-        .attr("y", (d) => heightScale(checkId(d) + 1))
-        .attr("transform", `translate(0,${progressTopOffset})`)
+        .attr("x", d => TIME_SCALE(d.data.ActualStart))
+        .attr("y", (d) => HEIGHT_SCALE(checkId(d) + 1))
+        .attr("transform", `translate(0,${PROGRESS_TOP_OFFSET})`)
         .attr("width", 10)
-        .attr("height", progressht)
+        .attr("height", PROGRESS_HT)
         .attr("class", "task-actual")
         .attr("rx", 2)
         .attr("ry", 2)
         // .attr("opacity", 0.5)
         .transition()
-        .duration(duration * 0.8)
+        .duration(DURATION * 0.8)
         .attr("width", d => {
-            let _w = timeScale(d.data.ActualFinish) - timeScale(d.data.ActualStart);
+            let _w = TIME_SCALE(d.data.ActualFinish) - TIME_SCALE(d.data.ActualStart);
             return _w > 10 ? _w : 10;
         });
 
     _grp.append("rect")
         .attr("x", 0)
-        .attr("y", d => heightScale(checkId(d) + 1))
-        .attr("width", w)
+        .attr("y", d => HEIGHT_SCALE(checkId(d) + 1))
+        .attr("width", W)
         .attr("height", 1)
-        .attr("transform", `translate(0,${taskht / 2})`)
+        .attr("transform", `translate(0,${TASK_HT / 2})`)
         .attr("class", "marker");
 
     //task names
     _grp.append("text")
         .text(d => /* hasChildren(d.data) ? d.data.TaskName.toUpperCase() : */ d.data.TaskName)
         .attr("x",/* d =>  hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
-        .attr("y", (d) => heightScale(checkId(d) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(checkId(d) + 1))
         .attr("class", "task")
-        .attr("transform", `translate(0,${taskNameTopOffset})`)
+        .attr("transform", `translate(0,${TASK_NAME_TOP_OFFSET})`)
         .each(function () {
             if (!isVisibilityAllowed(this)) {
                 this.setAttribute("display", "none");
@@ -429,7 +425,7 @@ function render(hierarchy) {
 
     setCurrentDate(dragPosition);
     setCurrentImage(dragPosition);
-    displayTaskInfo(data[0]);
+    displayTaskInfo(DATA[0]);
 
 }
 
@@ -437,7 +433,7 @@ function render(hierarchy) {
 function ptGenerator(k) {
     // [x,y]
     let offsetX = 3;
-    let offsetY = taskht / 2;
+    let offsetY = TASK_HT / 2;
     let ptList,
         pta = [],
         ptb = [];
@@ -455,16 +451,16 @@ function ptGenerator(k) {
         _typeb = "Start";
     }
 
-    let xa = timeScale(a[_typea]);
+    let xa = TIME_SCALE(a[_typea]);
     // collapsed nodes are not found in queue
     // in that case use parent's position
 
     // console.log(`id ${a.ID} con ${queue[checkId(k[1])].id} -- id ${b.ID} con ${queue[checkId(k[0])].id}`);
-    let ya = heightScale(checkId(k[1]) + 1) + offsetY;
-    let xb = timeScale(b[_typeb]);
-    let yb = heightScale(checkId(k[0]) + 1) + offsetY;
+    let ya = HEIGHT_SCALE(checkId(k[1]) + 1) + offsetY;
+    let xb = TIME_SCALE(b[_typeb]);
+    let yb = HEIGHT_SCALE(checkId(k[0]) + 1) + offsetY;
     let sign = +a.ID > +b.ID ? -1 : 1;// predecessor id > item id
-    let factor = (offsetY + gap / 3) * sign;
+    let factor = (offsetY + GAP / 3) * sign;
     if (_typea === "Start") {
         pta.push([xa - offsetX, ya]);
         pta.push([xa - offsetX, ya + factor]);
@@ -484,18 +480,18 @@ function ptGenerator(k) {
 
     ptList = [...pta, ...ptb].sort((a, b) => a[1] - b[1]);
     //console.log([k,ptList])
-    return linegenOutputPts ? ptList : lineGenerator(ptList);
+    return LINE_GEN_OUTPUT_POINTS ? ptList : LINE_GENERATOR(ptList);
 }
 
 function drawConnections() {
-    let _connections = connections.filter(con => {
+    let _connections = CONNECTIONS.filter(con => {
         let boolList = [];
         con.slice(0, 2).forEach(d => {
-            boolList.push(idqueue.includes(d.id));
+            boolList.push(ID_QUEUE.includes(d.id));
         });
         return boolList.every(i => i);
     });
-    gantt.append("g")
+    GANTT.append("g")
         .attr("id", "task-connections")
         .selectAll("path")
         .data(_connections)
@@ -534,10 +530,10 @@ function drawConnections() {
 
 // connection lines
 function updateConnections() {
-    connections.forEach(con => {
+    CONNECTIONS.forEach(con => {
         let boolList = [];
         con.slice(0, 2).forEach(d => {
-            boolList.push(idqueue.includes(d.id));
+            boolList.push(ID_QUEUE.includes(d.id));
         });
         let val = boolList.every(i => i);
         let id = "#con_" + con[1].id + "_" + con[0].id;
@@ -546,7 +542,7 @@ function updateConnections() {
         } else {
             d3.select(id).attr("class", "line")
                 .attr("display", function () {
-                    setTimeout(() => this.removeAttribute("display"), duration / 2)
+                    setTimeout(() => this.removeAttribute("display"), DURATION / 2)
                 });
         } // toggle filtered class 
 
@@ -555,22 +551,22 @@ function updateConnections() {
     // select path element
     d3.selectAll("path.filtered")
         .transition()
-        .duration(duration)
+        .duration(DURATION)
         .attr("opacity", 0)
         .attr("display", function () {
             setTimeout(() => {
                 this.setAttribute("display", "none")
-            }, duration / 2);
+            }, DURATION / 2);
         });
     // change d attr 
     d3.select("#task-connections")
         .selectAll("path")
         .transition()
-        .duration(duration)
+        .duration(DURATION)
         .attr("d", function (d) {
-            linegenOutputPts = true;
+            LINE_GEN_OUTPUT_POINTS = true;
             let ptList = ptGenerator(d);
-            return lineGenerator(ptList);
+            return LINE_GENERATOR(ptList);
         })
 
     // 
@@ -580,20 +576,20 @@ function toggleNodes(node) {
 
     // get node index
     let descendants = node._descendants;
-    let index = queue.indexOf(node);
+    let index = QUEUE.indexOf(node);
     const isChilderenVisible = !!node.children;
     toggleChildren(node);
 
-    let q = generateDataQueue(hierarchy);
-    queue = q[0];
-    idqueue = q[1];
+    let q = generateDataQueue(HIERARCHY);
+    QUEUE = q[0];
+    ID_QUEUE = q[1];
 
-    updateHeight(queue);
+    updateHeight(QUEUE);
     updateConnections();
-    svg
+    SVG
         .transition()
-        .duration(duration)
-        .attr("height", h);
+        .duration(DURATION)
+        .attr("height", H);
 
 
     function collapseNodes(d) {
@@ -605,12 +601,12 @@ function toggleNodes(node) {
                     if (isVisibilityAllowed(this)) {
                         this.setAttribute("display", "none")
                     }
-                }, duration)
+                }, DURATION)
             })
             .transition()
             .ease(d3.easeCubic)
-            .duration(duration)
-            .attr("y", heightScale(index + 1));
+            .duration(DURATION)
+            .attr("y", HEIGHT_SCALE(index + 1));
 
     }
 
@@ -619,8 +615,8 @@ function toggleNodes(node) {
         d3.selectAll("#grp" + nodedata.ID + " *")
             .transition()
             .ease(d3.easeCubic)
-            .duration(duration)
-            .attr("y", heightScale(i + index + 2));
+            .duration(DURATION)
+            .attr("y", HEIGHT_SCALE(i + index + 2));
     }
 
     function showNodes(d, i) {
@@ -634,22 +630,22 @@ function toggleNodes(node) {
             })
             .transition()
             .ease(d3.easeCubic)
-            .duration(duration)
-            .attr("y", heightScale(i + 1));
+            .duration(DURATION)
+            .attr("y", HEIGHT_SCALE(i + 1));
 
     }
 
     if (isChilderenVisible) {
         descendants.map(collapseNodes);
-        queue.slice(index + 1).map(moveGroups);
+        QUEUE.slice(index + 1).map(moveGroups);
     } else {
-        queue.map(showNodes);
+        QUEUE.map(showNodes);
     }
 
 }
 
 function setCurrentDate(dragPosition) {
-    let _d = new Date(timeScale.invert(dragPosition));
+    let _d = new Date(TIME_SCALE.invert(dragPosition));
     const options = {year: 'numeric', month: 'long', day: 'numeric'};
     document.querySelector("#current-date").innerHTML = `${_d.toLocaleDateString('en-US', options)}`
 }
@@ -657,7 +653,7 @@ function setCurrentDate(dragPosition) {
 function setCurrentImage(dragPosition) {
     let imageRange = d3.scaleLinear()
         .domain([1, 413])
-        .range(timeScale.range());
+        .range(TIME_SCALE.range());
     let imageIndex = Number(imageRange.invert(dragPosition));
     imageIndex -= imageIndex % 1;
     document.getElementById("sequence-img").setAttribute("src", `./assets/sequence/0 (${imageIndex}).jpg`)
@@ -785,11 +781,11 @@ function setupEventListeners() {
 
     // resize
     window.addEventListener("resize", () => {
-        svg.remove();
-        updateHeight(queue);
+        SVG.remove();
+        updateHeight(QUEUE);
         updateWidth();
-        updateScale(data);
-        render(hierarchy);
+        updateScale(DATA);
+        render(HIERARCHY);
     })
 }
 

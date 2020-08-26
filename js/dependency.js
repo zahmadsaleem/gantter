@@ -12,8 +12,8 @@ function dgraph() {
         .attr("overflow", "scroll");
 
     let colors = {"FF":"red","FS":"yellow","SS":"blue"}
-    const links = connections.map(d => { return { source: d[0], target: d[1] , type: d[2]?d[2]:"FS" } });
-    const nodes = data.map(d => d);
+    const links = CONNECTIONS.map(d => { return { source: d[0], target: d[1] , type: d[2]?d[2]:"FS" } });
+    const nodes = DATA.map(d => d);
     console.log(links);
 
     const simulation = d3.forceSimulation(nodes)
