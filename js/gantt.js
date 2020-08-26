@@ -46,11 +46,14 @@ function cleanJson(jsonData) {
 // TODO: create options object 
 // parse object properties i.e { property: f(value) }
 function processProjectData() {
-    function processDependencies(item, arr) {
+    function processDependencies(item, index, arr) {
+        if (!item.Predecessors) {
+            return
+        }
         let preArray = [];
         let _preArray = function (t) {
             let sc = t.search(/;/);
-            let c = t.search(/,/);
+            // let c = t.search(/,/);
             return sc === -1 ? t.split(",") : t.split(";");
         }(item.Predecessors.replace(/\s/g, ""));
 
@@ -76,7 +79,7 @@ function processProjectData() {
             return preObject
         }
 
-// NOTE : delimiters could be different
+        // NOTE : delimiters could be different
         _preArray.forEach((link) => {
             let predecessor;
             const rePre = /^\d+/g;
@@ -115,7 +118,7 @@ function processProjectData() {
         }
     }
 
-    data.forEach((item, index, arr) => {
+    function convertRawToObjects(item, index, arr) {
         // convert raw data types
         let _dur = item.Duration.match(/^\d+/g);
         item.Duration = _dur ? +_dur[0] : 1;
@@ -125,17 +128,13 @@ function processProjectData() {
         item.ActualStart = Date.parse(item.ActualStart);
         item.ActualFinish = Date.parse(item.ActualFinish);
 
-
         // convert indent to parent<>child list
         convertIndentsToParentChild(item, index, arr);
-    });
+    }
 
-    data.forEach((item, index, arr) => {
-        // process dependencies
-        if (item.Predecessors) {
-            processDependencies(item, arr);
-        }
-    })
+    data.forEach(convertRawToObjects);
+
+    data.forEach(processDependencies);
 
     // console.log(data);
     // console.log(connections);
@@ -186,10 +185,6 @@ function setupDataStructure() {
 
 }
 
-// #endregion
-
-// #region setup layout
-
 function updateHeight(data) {
     let wh = window.innerHeight * 0.85
     let sh = data.length * (taskht + gap)
@@ -212,11 +207,6 @@ function updateScale(data) {
         .range([0, h - 50]);
 
 }
-
-
-// #endregion
-
-// #region data utils
 
 function toggleChildren(d) {
     if (d.children) {
@@ -302,6 +292,30 @@ function generateDataQueue(root) {
 
 // #region add elements
 
+function onDragDateSelector(dragPosition) {
+    return function () {
+        const range = timeScale.range();
+        let checkMouseX = pos => {
+            if (pos < range[1] && pos > range[0]) {
+                dragPosition = pos;
+                return pos;
+            } else {
+                return dragPosition;
+            }
+        }
+        d3.select(this)
+            .attr("d", () => {
+                let ptx = checkMouseX(d3.event.x);
+                return lineGenerator([[ptx, 0], [ptx, h]])
+            });
+
+        // emit event? add listener to image, date
+        setCurrentDate(dragPosition);
+        setCurrentImage(dragPosition);
+        // change image
+    };
+}
+
 function render(hierarchy) {
     // top level container
     svg = d3.select("#gantt-container")
@@ -325,27 +339,7 @@ function render(hierarchy) {
         .attr("id", "date-selector")
         .attr("d", lineGenerator([[dragPosition, 0], [dragPosition, h]]))
         .call(d3.drag()
-            .on("drag", function () {
-                    const range = timeScale.range();
-                    let checkMouseX = pos => {
-                        if (pos < range[1] && pos > range[0]) {
-                            dragPosition = pos;
-                            return pos;
-                        } else {
-                            return dragPosition;
-                        }
-                    }
-                    d3.select(this)
-                        .attr("d", () => {
-                            let ptx = checkMouseX(d3.event.x);
-                            return lineGenerator([[ptx, 0], [ptx, h]])
-                        });
-
-                    // emit event? add listener to image, date
-                    setCurrentDate(dragPosition);
-                    setCurrentImage(dragPosition);
-                    // change image
-                }
+            .on("drag", onDragDateSelector(dragPosition)
             ));
 
     // rectangles
@@ -582,10 +576,6 @@ function updateConnections() {
     // 
 }
 
-// #endregion
-
-// #region interactivity utils
-
 function toggleNodes(node) {
 
     // get node index
@@ -794,10 +784,4 @@ function setupEventListeners() {
     })
 }
 
-// #endregion
-
-// #region execute
-
 getData("./data/convertcsv.json");
-
-// #endregion
