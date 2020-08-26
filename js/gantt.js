@@ -256,7 +256,7 @@ function checkId(node) {
     // if node is collapsed id isn't found in idqueue
     if (i === -1) {
         let anc = node.ancestors()
-        for (var o = 1; o < anc.length; ++o) {
+        for (let o = 1; o < anc.length; ++o) {
             let j = idqueue.indexOf(anc[o].id);
             if (j !== -1) {
                 return j;
@@ -326,7 +326,7 @@ function render(hierarchy) {
         .attr("overflow", "scroll");
 
     // time slider - behind  everything
-    var dragPosition = d3.mean(timeScale.range());
+    let dragPosition = d3.mean(timeScale.range());
 
     // main container for gantt chart
     gantt = svg.append("g")
@@ -581,7 +581,7 @@ function toggleNodes(node) {
     // get node index
     let descendants = node._descendants;
     let index = queue.indexOf(node);
-    const childs = node.children;
+    const isChilderenVisible = !!node.children;
     toggleChildren(node);
 
     let q = generateDataQueue(hierarchy);
@@ -596,46 +596,54 @@ function toggleNodes(node) {
         .attr("height", h);
 
 
-    if (childs) {
-        descendants.map((d) => {
-            let nodedata = d.data || d;
-            d3.selectAll("#grp" + nodedata.ID + " *")
-                .classed("hidden", true)
-                .each(function () {
-                    setTimeout(() => {
-                        if (isVisibilityAllowed(this)) {
-                            this.setAttribute("display", "none")
-                        }
-                    }, duration)
-                })
-                .transition()
-                .ease(d3.easeCubic)
-                .duration(duration)
-                .attr("y", heightScale(index + 1));
-        });
-        queue.slice(index + 1).map((d, i) => {
-            let nodedata = d.data || d;
-            d3.selectAll("#grp" + nodedata.ID + " *")
-                .transition()
-                .ease(d3.easeCubic)
-                .duration(duration)
-                .attr("y", heightScale(i + index + 2));
-        });
-    } else {
-        queue.map((d, i) => {
-            let nodedata = d.data || d;
-            d3.selectAll("#grp" + nodedata.ID + " *")
-                .classed("hidden", false)
-                .each(function () {
+    function collapseNodes(d) {
+        let nodedata = d.data || d;
+        d3.selectAll("#grp" + nodedata.ID + " *")
+            .classed("hidden", true)
+            .each(function () {
+                setTimeout(() => {
                     if (isVisibilityAllowed(this)) {
-                        this.setAttribute("display", "block");
+                        this.setAttribute("display", "none")
                     }
-                })
-                .transition()
-                .ease(d3.easeCubic)
-                .duration(duration)
-                .attr("y", heightScale(i + 1));
-        });
+                }, duration)
+            })
+            .transition()
+            .ease(d3.easeCubic)
+            .duration(duration)
+            .attr("y", heightScale(index + 1));
+
+    }
+
+    function moveGroups(d, i) {
+        let nodedata = d.data || d;
+        d3.selectAll("#grp" + nodedata.ID + " *")
+            .transition()
+            .ease(d3.easeCubic)
+            .duration(duration)
+            .attr("y", heightScale(i + index + 2));
+    }
+
+    function showNodes(d, i) {
+        let nodedata = d.data || d;
+        d3.selectAll("#grp" + nodedata.ID + " *")
+            .classed("hidden", false)
+            .each(function () {
+                if (isVisibilityAllowed(this)) {
+                    this.setAttribute("display", "block");
+                }
+            })
+            .transition()
+            .ease(d3.easeCubic)
+            .duration(duration)
+            .attr("y", heightScale(i + 1));
+
+    }
+
+    if (isChilderenVisible) {
+        descendants.map(collapseNodes);
+        queue.slice(index + 1).map(moveGroups);
+    } else {
+        queue.map(showNodes);
     }
 
 }
@@ -662,9 +670,9 @@ function removeSelection() {
 
 function isVisibilityAllowed(d) {
     if (d.id.startsWith("progress")) {
-        return isProgressVisible.checked;
+        return document.getElementById("isProgressVisible").checked;
     } else if (d.classList.contains("task")) {
-        return isTextVisible.checked;
+        return document.getElementById("isTextVisible").checked;
     } else if (d.id.startsWith("id")) {
         return true;
     } else {
@@ -677,13 +685,14 @@ function checkSelection(id) {
 }
 
 function scrollToTask(taskId) {
+    const scrollOptions = {
+        top: document.getElementById(taskId)
+            .getAttribute("y"),
+        left: 0,
+        behavior: 'smooth'
+    }
     document.getElementById("gantt-container")
-        .scrollTo({
-            top: document.getElementById(taskId)
-                .getAttribute("y"),
-            left: 0,
-            behavior: 'smooth'
-        })
+        .scrollTo(scrollOptions)
 }
 
 function highlightTaskSelection(taskId) {
