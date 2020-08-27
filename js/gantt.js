@@ -9,6 +9,7 @@ const TASK_HT = 15,
     DURATION = 1000;
 
 let SVG,
+    GANTT,
     QUEUE = [],
     ID_QUEUE = [],
     LINE_GENERATOR,
@@ -19,8 +20,8 @@ let LINE_GEN_OUTPUT_POINTS = false;
 
 // TODO : Create options for input
 // either json or csv
-function getData(url) {
-    d3.json(url).then(d => processProjectData(cleanJson(d)));
+async function getData(url) {
+    return await d3.json(url);
 }
 
 // remove spaces from json keys
@@ -130,7 +131,11 @@ function processProjectData(data) {
 
     data = data.map(processDependencies);
 
-    setupDataStructure(data, connections);
+    let hierarchy = setupDataStructure(data, connections);
+    let q = generateDataQueue(hierarchy);
+    QUEUE = q[0]
+    ID_QUEUE = q[1];
+    return {data, connections, hierarchy}
 }
 
 // main function after data processing
@@ -153,24 +158,7 @@ function setupDataStructure(data, connections) {
         arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
     });
 
-    // path generator for dependency links
-    LINE_GENERATOR = d3.line()
-        .x((d) => d[0])
-        .y((d) => d[1])
-        .curve(d3.curveStep);
-
-
-    setupEventListeners(data, hierarchy);
-
-    //execute
-    let q = generateDataQueue(hierarchy);
-    QUEUE = q[0]
-    ID_QUEUE = q[1];
-
-    updateHeight(data);
-    updateWidth();
-    updateScale(data);
-    render(hierarchy, data, connections);
+    return hierarchy;
 }
 
 function updateHeight(data) {
@@ -193,7 +181,6 @@ function updateScale(data) {
     HEIGHT_SCALE = d3.scaleLinear()
         .domain([1, data.length])
         .range([0, H - 50]);
-
 }
 
 function toggleChildren(d) {
@@ -217,25 +204,6 @@ function hasChildren(d) {
 function getTaskByID(id, data) {
     let task = data.filter((d) => d.ID === id);
     return task ? task[0] : undefined;
-}
-
-// based on preceding, succeeding events
-function getFuture(d, dependents, data) {
-    if (!dependents) dependents = [];
-    if (d.dependents.length > 0) {
-        d.dependents.forEach(i => {
-            let j = getTaskByID(i, data);
-            if (!dependents.includes(j)) {
-                dependents.push(j);
-                getFuture(j, dependents, data);
-            } else {
-                console.log(`probable loop dependency ${i}`)
-            }
-        });
-        return dependents;
-    } else {
-        return dependents;
-    }
 }
 
 function checkId(node) {
@@ -300,6 +268,15 @@ function onDragDateSelector(dragPosition) {
     };
 }
 
+function onDoubleClickTaskRectangle(hierarchy, connections) {
+    // d is d3 bound data
+    return function (d) {
+        if (d.children || d._children) {
+            toggleNodes(d, hierarchy, connections);
+        }
+    };
+}
+
 function render(hierarchy, data, connections) {
     // top level container
     SVG = d3.select("#gantt-container")
@@ -357,11 +334,7 @@ function render(hierarchy, data, connections) {
             d3.select("#id" + d.id).attr("class", "selected");
             displayTaskInfo(d.data, data);
         })
-        .on("dblclick", function (d) {
-            if (d.children || d._children) {
-                toggleNodes(d, hierarchy, connections);
-            }
-        });
+        .on("dblclick", onDoubleClickTaskRectangle(hierarchy, connections));
 
     // actual time rectangles
     _grp.append("rect")
@@ -418,7 +391,7 @@ function render(hierarchy, data, connections) {
 }
 
 // path points for connection lines
-function ptGenerator(k) {
+function generateConnectionPoints(k) {
     // [x,y]
     let offsetX = 3;
     let offsetY = TASK_HT / 2;
@@ -488,7 +461,7 @@ function drawConnections(connections) {
         .attr("class", "line")
         .attr("opacity", 0.3)
         .attr("id", d => "con_" + d[1].id + "_" + d[0].id)
-        .attr("d", ptGenerator)
+        .attr("d", generateConnectionPoints)
         .on("mouseover", function (k) {
             if (!checkSelection(k[0].id)) {
                 d3.select("#id" + k[0].id).attr("class", "select-rect");
@@ -553,11 +526,9 @@ function updateConnections(connections) {
         .duration(DURATION)
         .attr("d", function (d) {
             LINE_GEN_OUTPUT_POINTS = true;
-            let ptList = ptGenerator(d);
+            let ptList = generateConnectionPoints(d);
             return LINE_GENERATOR(ptList);
         })
-
-    // 
 }
 
 function toggleNodes(node, hierarchy, connections) {
@@ -777,4 +748,43 @@ function setupEventListeners(data, hierarchy) {
     })
 }
 
-getData("./data/convertcsv.json");
+(async () => {
+    let rawData = await getData("./data/convertcsv.json");
+    let {data, hierarchy, connections} = processProjectData(cleanJson(rawData));
+
+    // path generator for dependency links
+    LINE_GENERATOR = d3.line()
+        .x((d) => d[0])
+        .y((d) => d[1])
+        .curve(d3.curveStep);
+
+    setupEventListeners(data, hierarchy);
+    updateHeight(data);
+    updateWidth();
+    updateScale(data);
+    render(hierarchy, data, connections);
+})();
+
+
+// -----------UNCHARTED WATERS-------------------------------
+
+// based on preceding, succeeding events
+// TODO : select all connected
+function getFuture(d, dependents, data) {
+    if (!dependents) dependents = [];
+    if (d.dependents.length > 0) {
+        d.dependents.forEach(i => {
+            let j = getTaskByID(i, data);
+            if (!dependents.includes(j)) {
+                dependents.push(j);
+                getFuture(j, dependents, data);
+            } else {
+                console.log(`probable loop dependency ${i}`)
+            }
+        });
+        return dependents;
+    } else {
+        return dependents;
+    }
+}
+
