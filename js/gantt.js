@@ -1,6 +1,7 @@
 let W,
-    H,
-    TASK_HT = 15,
+    H;
+
+const TASK_HT = 15,
     PROGRESS_HT = 8,
     GAP = 4,
     PROGRESS_TOP_OFFSET = (TASK_HT - PROGRESS_HT) / 2,
@@ -8,10 +9,6 @@ let W,
     DURATION = 1000;
 
 let SVG,
-    DATA,
-    GANTT,
-    HIERARCHY,
-    CONNECTIONS = [],
     QUEUE = [],
     ID_QUEUE = [],
     LINE_GENERATOR,
@@ -23,15 +20,7 @@ let LINE_GEN_OUTPUT_POINTS = false;
 // TODO : Create options for input
 // either json or csv
 function getData(url) {
-    d3.json(url)
-        // d3.json(url)
-        .then(d => {
-            // remove spaces from json keys
-            DATA = cleanJson(d);
-        }).then(() => {
-        DATA.forEach(d => d.dependents = []);
-        processProjectData();
-    });
+    d3.json(url).then(d => processProjectData(cleanJson(d)));
 }
 
 // remove spaces from json keys
@@ -45,10 +34,13 @@ function cleanJson(jsonData) {
 // process data
 // TODO: create options object 
 // parse object properties i.e { property: f(value) }
-function processProjectData() {
+function processProjectData(data) {
+    let connections = [];
+
     function processDependencies(item, index, arr) {
+
         if (!item.Predecessors) {
-            return
+            return item
         }
         let preArray = [];
         let _preArray = function (t) {
@@ -75,7 +67,7 @@ function processProjectData() {
             } else {
                 preObject.addition = 0;
             }
-            CONNECTIONS.push([item, getTaskByID(_pre[0]), _type ? _type[0] : undefined]);
+            connections.push([item, getTaskByID(_pre[0], data), _type ? _type[0] : undefined]);
             return preObject
         }
 
@@ -94,6 +86,7 @@ function processProjectData() {
 
         });
         item.preArray = preArray;
+        return item
     }
 
     function convertIndentsToParentChild(item, index, arr) {
@@ -116,6 +109,7 @@ function processProjectData() {
         } else {
             item.parents = [];
         }
+        return item;
     }
 
     function convertRawToObjects(item, index, arr) {
@@ -127,36 +121,35 @@ function processProjectData() {
         item.ID = String(item.ID);
         item.ActualStart = Date.parse(item.ActualStart);
         item.ActualFinish = Date.parse(item.ActualFinish);
-
+        item.dependents = []
         // convert indent to parent<>child list
-        convertIndentsToParentChild(item, index, arr);
+        return convertIndentsToParentChild(item, index, arr);
     }
 
-    DATA.forEach(convertRawToObjects);
+    data = data.map(convertRawToObjects);
 
-    DATA.forEach(processDependencies);
+    data = data.map(processDependencies);
 
-    setupDataStructure();
+    setupDataStructure(data, connections);
 }
 
 // main function after data processing
 // create necessary data structure eg: tree
-function setupDataStructure() {
+function setupDataStructure(data, connections) {
 
     // setting up the data structure
     const stratify = d3.stratify()
         .id(d => d.ID)
         .parentId(d => d.parents.length > 0 ? d.parents.slice(-1)[0] : "");
 
-    HIERARCHY = stratify(DATA);
-
-    HIERARCHY.each((d) => d._descendants = d.descendants().slice(1));
+    let hierarchy = stratify(data);
+    hierarchy.each((d) => d._descendants = d.descendants().slice(1));
     let _flatHierarchy = {};
 
-    HIERARCHY.descendants().forEach((d) => _flatHierarchy[d.id] = d);
+    hierarchy.descendants().forEach((d) => _flatHierarchy[d.id] = d);
 
     // rebuild connections with hierarchy data
-    CONNECTIONS.map((con, i, arr) => {
+    connections.map((con, i, arr) => {
         arr[i] = [_flatHierarchy[con[0].ID], _flatHierarchy[con[1].ID], con[2]];
     });
 
@@ -167,18 +160,17 @@ function setupDataStructure() {
         .curve(d3.curveStep);
 
 
-    setupEventListeners();
+    setupEventListeners(data, hierarchy);
 
     //execute
-    let q = generateDataQueue(HIERARCHY);
+    let q = generateDataQueue(hierarchy);
     QUEUE = q[0]
     ID_QUEUE = q[1];
 
-    updateHeight(DATA);
+    updateHeight(data);
     updateWidth();
-    updateScale(DATA);
-    render(HIERARCHY);
-
+    updateScale(data);
+    render(hierarchy, data, connections);
 }
 
 function updateHeight(data) {
@@ -222,20 +214,20 @@ function hasChildren(d) {
     }
 }
 
-function getTaskByID(id) {
-    let task = DATA.filter((d) => d.ID === id);
+function getTaskByID(id, data) {
+    let task = data.filter((d) => d.ID === id);
     return task ? task[0] : undefined;
 }
 
 // based on preceding, succeeding events
-function getFuture(d, dependents) {
+function getFuture(d, dependents, data) {
     if (!dependents) dependents = [];
     if (d.dependents.length > 0) {
         d.dependents.forEach(i => {
-            let j = getTaskByID(i);
+            let j = getTaskByID(i, data);
             if (!dependents.includes(j)) {
                 dependents.push(j);
-                getFuture(j, dependents);
+                getFuture(j, dependents, data);
             } else {
                 console.log(`probable loop dependency ${i}`)
             }
@@ -284,10 +276,6 @@ function generateDataQueue(root) {
     return m(root, q, i);
 }
 
-// #endregion
-
-// #region add elements
-
 function onDragDateSelector(dragPosition) {
     return function () {
         const range = TIME_SCALE.range();
@@ -312,7 +300,7 @@ function onDragDateSelector(dragPosition) {
     };
 }
 
-function render(hierarchy) {
+function render(hierarchy, data, connections) {
     // top level container
     SVG = d3.select("#gantt-container")
         .append("svg")
@@ -329,7 +317,7 @@ function render(hierarchy) {
         .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
 
-    drawConnections();
+    drawConnections(connections);
 
     GANTT.append("path")
         .attr("id", "date-selector")
@@ -367,11 +355,11 @@ function render(hierarchy) {
                 .filter((k) => k.id.split("_").includes(d.id))
                 .forEach(el => d3.select(el).attr("class", "selected"));
             d3.select("#id" + d.id).attr("class", "selected");
-            displayTaskInfo(d.data);
+            displayTaskInfo(d.data, data);
         })
         .on("dblclick", function (d) {
             if (d.children || d._children) {
-                toggleNodes(d);
+                toggleNodes(d, hierarchy, connections);
             }
         });
 
@@ -425,7 +413,7 @@ function render(hierarchy) {
 
     setCurrentDate(dragPosition);
     setCurrentImage(dragPosition);
-    displayTaskInfo(DATA[0]);
+    displayTaskInfo(data[0], data);
 
 }
 
@@ -483,8 +471,8 @@ function ptGenerator(k) {
     return LINE_GEN_OUTPUT_POINTS ? ptList : LINE_GENERATOR(ptList);
 }
 
-function drawConnections() {
-    let _connections = CONNECTIONS.filter(con => {
+function drawConnections(connections) {
+    let _connections = connections.filter(con => {
         let boolList = [];
         con.slice(0, 2).forEach(d => {
             boolList.push(ID_QUEUE.includes(d.id));
@@ -529,8 +517,8 @@ function drawConnections() {
 }
 
 // connection lines
-function updateConnections() {
-    CONNECTIONS.forEach(con => {
+function updateConnections(connections) {
+    connections.forEach(con => {
         let boolList = [];
         con.slice(0, 2).forEach(d => {
             boolList.push(ID_QUEUE.includes(d.id));
@@ -572,7 +560,7 @@ function updateConnections() {
     // 
 }
 
-function toggleNodes(node) {
+function toggleNodes(node, hierarchy, connections) {
 
     // get node index
     let descendants = node._descendants;
@@ -580,12 +568,12 @@ function toggleNodes(node) {
     const isChilderenVisible = !!node.children;
     toggleChildren(node);
 
-    let q = generateDataQueue(HIERARCHY);
+    let q = generateDataQueue(hierarchy);
     QUEUE = q[0];
     ID_QUEUE = q[1];
 
     updateHeight(QUEUE);
-    updateConnections();
+    updateConnections(connections);
     SVG
         .transition()
         .duration(DURATION)
@@ -700,7 +688,7 @@ function highlightTaskSelection(taskId) {
     }, 1000);
 }
 
-function displayTaskInfo(taskObj) {
+function displayTaskInfo(taskObj, data) {
     const options = {year: 'numeric', month: 'long', day: 'numeric'};
 
     const fields = {
@@ -738,13 +726,13 @@ function displayTaskInfo(taskObj) {
             scrollToTask(r);
             highlightTaskSelection(r);
         });
-        el.innerHTML = `<td>${getTaskByID(dep).TaskName}</td>`;
+        el.innerHTML = `<td>${getTaskByID(dep, data).TaskName}</td>`;
         document.getElementById("dependency-container").append(el);
 
     }
 }
 
-function setupEventListeners() {
+function setupEventListeners(data, hierarchy) {
     let isLinksVisible = document.getElementById("isLinksVisible")
     isLinksVisible.checked = true;
     isLinksVisible.addEventListener("click", function () {
@@ -784,8 +772,8 @@ function setupEventListeners() {
         SVG.remove();
         updateHeight(QUEUE);
         updateWidth();
-        updateScale(DATA);
-        render(HIERARCHY);
+        updateScale(data);
+        render(hierarchy, data);
     })
 }
 
