@@ -7,6 +7,7 @@ const TASK_HT = 15,
     PROGRESS_TOP_OFFSET = (TASK_HT - PROGRESS_HT) / 2,
     TASK_NAME_TOP_OFFSET = TASK_HT / 3,
     DURATION = 1000;
+    IMAGE_SEQUENCE_DOMAIN = [1, 413];
 
 let GANTT,
     LINE_GENERATOR,
@@ -610,7 +611,7 @@ function setCurrentDate(dragPosition) {
 
 function setCurrentImage(dragPosition) {
     let imageRange = d3.scaleLinear()
-        .domain([1, 413])
+        .domain(IMAGE_SEQUENCE_DOMAIN)
         .range(TIME_SCALE.range());
     let imageIndex = Number(imageRange.invert(dragPosition));
     imageIndex -= imageIndex % 1;
@@ -745,6 +746,15 @@ function setupEventListeners(data, hierarchy, connections) {
     })
 }
 
+async function preLoadImages(img_seq_domain){
+    let [start, end] = img_seq_domain;
+    for (let i = start; i<end; i++){
+        let img = document.createElement("img");
+        img.setAttribute("src", `./assets/sequence/0 (${i}).jpg`)
+        img.remove();
+    }
+}
+
 // execute on load
 (async () => {
     let rawData = await getData("./data/convertcsv.json");
@@ -762,6 +772,7 @@ function setupEventListeners(data, hierarchy, connections) {
     updateWidth();
     updateScale(data);
     render(hierarchy, data, connections, queue, id_queue);
+    preLoadImages(IMAGE_SEQUENCE_DOMAIN);
 })();
 
 
