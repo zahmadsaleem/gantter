@@ -678,10 +678,7 @@ function displayTaskInfo(taskObj, data) {
 
     //  delete all children
     let dependency_list = document.getElementById("dependency-container").children;
-
-    for (const d of dependency_list) {
-        d.remove();
-    }
+    Array.from(dependency_list).forEach(i => i.remove())
 
     for (const dep of taskObj.dependents) {
         // add info-link, scroll to
