@@ -10,8 +10,6 @@ const TASK_HT = 15,
 
 let SVG,
     GANTT,
-    QUEUE = [],
-    ID_QUEUE = [],
     LINE_GENERATOR,
     HEIGHT_SCALE,
     TIME_SCALE;
@@ -132,10 +130,8 @@ function processProjectData(data) {
     data = data.map(processDependencies);
 
     let hierarchy = setupDataStructure(data, connections);
-    let q = generateDataQueue(hierarchy);
-    QUEUE = q[0]
-    ID_QUEUE = q[1];
-    return {data, connections, hierarchy}
+    let [queue, id_queue] = generateDataQueue(hierarchy);
+    return {data, connections, hierarchy, queue, id_queue}
 }
 
 // main function after data processing
@@ -206,14 +202,14 @@ function getTaskByID(id, data) {
     return task ? task[0] : undefined;
 }
 
-function checkId(node) {
-    let i = ID_QUEUE.indexOf(node.id);
+function checkId(node, id_queue) {
+    let i = id_queue.indexOf(node.id);
 
     // if node is collapsed id isn't found in idqueue
     if (i === -1) {
         let anc = node.ancestors()
         for (let o = 1; o < anc.length; ++o) {
-            let j = ID_QUEUE.indexOf(anc[o].id);
+            let j = id_queue.indexOf(anc[o].id);
             if (j !== -1) {
                 return j;
             }
@@ -268,16 +264,16 @@ function onDragDateSelector(dragPosition) {
     };
 }
 
-function onDoubleClickTaskRectangle(hierarchy, connections) {
+function onDoubleClickTaskRectangle(hierarchy, connections, queue) {
     // d is d3 bound data
     return function (d) {
         if (d.children || d._children) {
-            toggleNodes(d, hierarchy, connections);
+            toggleNodes(d, hierarchy, connections, queue);
         }
     };
 }
 
-function render(hierarchy, data, connections) {
+function render(hierarchy, data, connections, queue, id_queue) {
     // top level container
     SVG = d3.select("#gantt-container")
         .append("svg")
@@ -294,7 +290,7 @@ function render(hierarchy, data, connections) {
         .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
 
-    drawConnections(connections);
+    drawConnections(connections, id_queue);
 
     GANTT.append("path")
         .attr("id", "date-selector")
@@ -315,7 +311,7 @@ function render(hierarchy, data, connections) {
     _grp.append("rect")
         .attr("id", d => "id" + d.id)
         .attr("x", d => TIME_SCALE(d.data.Start))
-        .attr("y", (d) => HEIGHT_SCALE(checkId(d) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(checkId(d, id_queue) + 1))
         .attr("width", d => {
             let _w = TIME_SCALE(d.data.Finish) - TIME_SCALE(d.data.Start);
             return _w > 10 ? _w : 10;
@@ -334,13 +330,13 @@ function render(hierarchy, data, connections) {
             d3.select("#id" + d.id).attr("class", "selected");
             displayTaskInfo(d.data, data);
         })
-        .on("dblclick", onDoubleClickTaskRectangle(hierarchy, connections));
+        .on("dblclick", onDoubleClickTaskRectangle(hierarchy, connections, queue));
 
     // actual time rectangles
     _grp.append("rect")
         .attr("id", d => "progress" + d.id)
         .attr("x", d => TIME_SCALE(d.data.ActualStart))
-        .attr("y", (d) => HEIGHT_SCALE(checkId(d) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(checkId(d, id_queue) + 1))
         .attr("transform", `translate(0,${PROGRESS_TOP_OFFSET})`)
         .attr("width", 10)
         .attr("height", PROGRESS_HT)
@@ -357,7 +353,7 @@ function render(hierarchy, data, connections) {
 
     _grp.append("rect")
         .attr("x", 0)
-        .attr("y", d => HEIGHT_SCALE(checkId(d) + 1))
+        .attr("y", d => HEIGHT_SCALE(checkId(d, id_queue) + 1))
         .attr("width", W)
         .attr("height", 1)
         .attr("transform", `translate(0,${TASK_HT / 2})`)
@@ -367,7 +363,7 @@ function render(hierarchy, data, connections) {
     _grp.append("text")
         .text(d => /* hasChildren(d.data) ? d.data.TaskName.toUpperCase() : */ d.data.TaskName)
         .attr("x",/* d =>  hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
-        .attr("y", (d) => HEIGHT_SCALE(checkId(d) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(checkId(d, id_queue) + 1))
         .attr("class", "task")
         .attr("transform", `translate(0,${TASK_NAME_TOP_OFFSET})`)
         .each(function () {
@@ -391,7 +387,7 @@ function render(hierarchy, data, connections) {
 }
 
 // path points for connection lines
-function generateConnectionPoints(k) {
+function generateConnectionPoints(k, id_queue) {
     // [x,y]
     let offsetX = 3;
     let offsetY = TASK_HT / 2;
@@ -416,10 +412,10 @@ function generateConnectionPoints(k) {
     // collapsed nodes are not found in queue
     // in that case use parent's position
 
-    // console.log(`id ${a.ID} con ${queue[checkId(k[1])].id} -- id ${b.ID} con ${queue[checkId(k[0])].id}`);
-    let ya = HEIGHT_SCALE(checkId(k[1]) + 1) + offsetY;
+    // console.log(`id ${a.ID} con ${queue[checkId(k[1], id_queue)].id} -- id ${b.ID} con ${queue[checkId(k[0], id_queue)].id}`);
+    let ya = HEIGHT_SCALE(checkId(k[1], id_queue) + 1) + offsetY;
     let xb = TIME_SCALE(b[_typeb]);
-    let yb = HEIGHT_SCALE(checkId(k[0]) + 1) + offsetY;
+    let yb = HEIGHT_SCALE(checkId(k[0], id_queue) + 1) + offsetY;
     let sign = +a.ID > +b.ID ? -1 : 1;// predecessor id > item id
     let factor = (offsetY + GAP / 3) * sign;
     if (_typea === "Start") {
@@ -444,11 +440,11 @@ function generateConnectionPoints(k) {
     return LINE_GEN_OUTPUT_POINTS ? ptList : LINE_GENERATOR(ptList);
 }
 
-function drawConnections(connections) {
+function drawConnections(connections, id_queue) {
     let _connections = connections.filter(con => {
         let boolList = [];
         con.slice(0, 2).forEach(d => {
-            boolList.push(ID_QUEUE.includes(d.id));
+            boolList.push(id_queue.includes(d.id));
         });
         return boolList.every(i => i);
     });
@@ -461,7 +457,7 @@ function drawConnections(connections) {
         .attr("class", "line")
         .attr("opacity", 0.3)
         .attr("id", d => "con_" + d[1].id + "_" + d[0].id)
-        .attr("d", generateConnectionPoints)
+        .attr("d", (k) => generateConnectionPoints(k, id_queue))
         .on("mouseover", function (k) {
             if (!checkSelection(k[0].id)) {
                 d3.select("#id" + k[0].id).attr("class", "select-rect");
@@ -490,11 +486,11 @@ function drawConnections(connections) {
 }
 
 // connection lines
-function updateConnections(connections) {
+function updateConnections(connections, id_queue) {
     connections.forEach(con => {
         let boolList = [];
         con.slice(0, 2).forEach(d => {
-            boolList.push(ID_QUEUE.includes(d.id));
+            boolList.push(id_queue.includes(d.id));
         });
         let val = boolList.every(i => i);
         let id = "#con_" + con[1].id + "_" + con[0].id;
@@ -526,25 +522,24 @@ function updateConnections(connections) {
         .duration(DURATION)
         .attr("d", function (d) {
             LINE_GEN_OUTPUT_POINTS = true;
-            let ptList = generateConnectionPoints(d);
+            let ptList = generateConnectionPoints(d, id_queue);
             return LINE_GENERATOR(ptList);
         })
 }
 
-function toggleNodes(node, hierarchy, connections) {
+function toggleNodes(node, hierarchy, connections, queue) {
 
     // get node index
     let descendants = node._descendants;
-    let index = QUEUE.indexOf(node);
+    let index = queue.indexOf(node);
     const isChilderenVisible = !!node.children;
     toggleChildren(node);
 
-    let q = generateDataQueue(hierarchy);
-    QUEUE = q[0];
-    ID_QUEUE = q[1];
+    let [queue_new, id_queue] = generateDataQueue(hierarchy);
+    queue = queue_new;
 
-    updateHeight(QUEUE);
-    updateConnections(connections);
+    updateHeight(queue);
+    updateConnections(connections, id_queue);
     SVG
         .transition()
         .duration(DURATION)
@@ -596,9 +591,9 @@ function toggleNodes(node, hierarchy, connections) {
 
     if (isChilderenVisible) {
         descendants.map(collapseNodes);
-        QUEUE.slice(index + 1).map(moveGroups);
+        queue.slice(index + 1).map(moveGroups);
     } else {
-        QUEUE.map(showNodes);
+        queue.map(showNodes);
     }
 
 }
@@ -703,7 +698,7 @@ function displayTaskInfo(taskObj, data) {
     }
 }
 
-function setupEventListeners(data, hierarchy) {
+function setupEventListeners(data, hierarchy, queue) {
     let isLinksVisible = document.getElementById("isLinksVisible")
     isLinksVisible.checked = true;
     isLinksVisible.addEventListener("click", function () {
@@ -741,16 +736,17 @@ function setupEventListeners(data, hierarchy) {
     // resize
     window.addEventListener("resize", () => {
         SVG.remove();
-        updateHeight(QUEUE);
+        updateHeight(queue);
         updateWidth();
         updateScale(data);
         render(hierarchy, data);
     })
 }
 
+// execute on load
 (async () => {
     let rawData = await getData("./data/convertcsv.json");
-    let {data, hierarchy, connections} = processProjectData(cleanJson(rawData));
+    let {data, hierarchy, connections, queue, id_queue} = processProjectData(cleanJson(rawData));
 
     // path generator for dependency links
     LINE_GENERATOR = d3.line()
@@ -762,7 +758,7 @@ function setupEventListeners(data, hierarchy) {
     updateHeight(data);
     updateWidth();
     updateScale(data);
-    render(hierarchy, data, connections);
+    render(hierarchy, data, connections, queue, id_queue);
 })();
 
 
