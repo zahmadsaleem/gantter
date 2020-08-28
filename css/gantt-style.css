@@ -1,105 +1,108 @@
 .line {
-  fill: none;
-  stroke: rgb(12, 108, 187);
-  stroke-width: 1px;
-  opacity: 0.5;
+    fill: none;
+    stroke: rgb(12, 108, 187);
+    stroke-width: 1px;
+    opacity: 0.5;
 }
 
 .line:hover {
-  fill: none;
-  stroke-width: 3px;
-  opacity: 1;
+    fill: none;
+    stroke-width: 3px;
+    opacity: 1;
 }
 
 .select-rect {
-  fill: rgb(238, 0, 206);
+    fill: rgb(238, 0, 206);
 }
 
 path.selected {
-  fill: none;
-  stroke: rgb(12, 108, 187);
-  stroke-width: 3px;
-  opacity: 1;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+    fill: none;
+    stroke: rgb(12, 108, 187);
+    stroke-width: 3px;
+    opacity: 1;
+    stroke-linecap: round;
+    stroke-linejoin: round;
 }
 
 .task {
-  fill: rgb(255, 255, 255);
-  font-weight: 400;
-  font-size: xx-small;
-  font-family: Verdana, Geneva, Tahoma, sans-serif;
-  opacity: 0.8;
+    fill: rgb(255, 255, 255);
+    font-weight: 400;
+    font-size: xx-small;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    opacity: 0.8;
 }
 
 .task-rect {
-  fill: #14568c;
-  /* opacity: 0.5; */
+    fill: #14568c;
+    /* opacity: 0.5; */
 }
+
 .task-actual {
-  fill: #a10b39;
+    fill: #a10b39;
 }
 
 .task-parent {
-  fill: #3fa9ff;
+    fill: #3fa9ff;
 }
 
 .task-rect:hover {
-  opacity: 0.8;
+    opacity: 0.8;
 }
 
 rect.selected {
-  fill: rgb(238, 0, 206);
+    fill: rgb(238, 0, 206);
 }
 
 #date-selector {
-   stroke-width: 3px ;
-   stroke: rgb(0, 255, 0);
-   fill: black;
+    stroke-width: 3px;
+    stroke: rgb(0, 255, 0);
+    fill: black;
 }
 
-#date-selector:hover{
-  cursor: e-resize;
+#date-selector:hover {
+    cursor: e-resize;
 }
 
-.line-target{
-  fill: rgb(201, 177, 40);
+.line-target {
+    fill: rgb(201, 177, 40);
 }
 
-.marker{
-  fill: white;
-  opacity: 0.2;
+.marker {
+    fill: white;
+    opacity: 0.2;
 }
 
-#gantt-container{
-  overflow-y: scroll;
-  max-height: 85vh;
-border-bottom: 2px solid black;
-background-color: black;
+#gantt-container {
+    min-width: 600px;
+    overflow-y: scroll;
+    max-height: 85vh;
+    border-bottom: 2px solid black;
+    background-color: black;
 }
+
 /**  STYLE 3 */
 #gantt-container::-webkit-scrollbar-track {
--webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-background-color: #F5F5F5;
+    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+    background-color: #F5F5F5;
 }
 
 #gantt-container::-webkit-scrollbar {
-width: 6px;
-background-color: #F5F5F5;
+    width: 6px;
+    background-color: #F5F5F5;
 }
 
 #gantt-container::-webkit-scrollbar-thumb {
-background-color: #000000;
+    background-color: #000000;
 }
 
-.select-blink1{
-  stroke-opacity: 0;
-  stroke: aqua;
-  stroke-width: 2px;
-  transition-property: stroke-opacity;
-  transition-duration: 1s;
+.select-blink1 {
+    stroke-opacity: 0;
+    stroke: aqua;
+    stroke-width: 2px;
+    transition-property: stroke-opacity;
+    transition-duration: 1s;
 }
 
-.select-blink{
-  stroke-opacity: 1;
+.select-blink {
+    stroke-opacity: 1;
 }

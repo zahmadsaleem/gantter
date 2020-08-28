@@ -129,9 +129,7 @@ function processProjectData(data) {
 
     data = data.map(processDependencies);
 
-    let hierarchy = setupDataStructure(data, connections);
-    let [queue, id_queue] = generateDataQueue(hierarchy);
-    return {data, connections, hierarchy, queue, id_queue}
+    return {data, connections}
 }
 
 // main function after data processing
@@ -698,7 +696,7 @@ function displayTaskInfo(taskObj, data) {
     }
 }
 
-function setupEventListeners(data, hierarchy, queue) {
+function setupEventListeners(data, hierarchy, connections) {
     let isLinksVisible = document.getElementById("isLinksVisible")
     isLinksVisible.checked = true;
     isLinksVisible.addEventListener("click", function () {
@@ -736,25 +734,27 @@ function setupEventListeners(data, hierarchy, queue) {
     // resize
     window.addEventListener("resize", () => {
         SVG.remove();
-        updateHeight(queue);
+        let [q, iq] = generateDataQueue(hierarchy)
+        updateHeight(q);
         updateWidth();
         updateScale(data);
-        render(hierarchy, data);
+        render(hierarchy, data, connections, q, iq);
     })
 }
 
 // execute on load
 (async () => {
     let rawData = await getData("./data/convertcsv.json");
-    let {data, hierarchy, connections, queue, id_queue} = processProjectData(cleanJson(rawData));
-
+    let {data, connections} = processProjectData(cleanJson(rawData));
+    let hierarchy = setupDataStructure(data, connections);
+    let [queue, id_queue] = generateDataQueue(hierarchy);
     // path generator for dependency links
     LINE_GENERATOR = d3.line()
         .x((d) => d[0])
         .y((d) => d[1])
         .curve(d3.curveStep);
 
-    setupEventListeners(data, hierarchy);
+    setupEventListeners(data, hierarchy, connections);
     updateHeight(data);
     updateWidth();
     updateScale(data);
