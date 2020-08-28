@@ -8,8 +8,7 @@ const TASK_HT = 15,
     TASK_NAME_TOP_OFFSET = TASK_HT / 3,
     DURATION = 1000;
 
-let SVG,
-    GANTT,
+let GANTT,
     LINE_GENERATOR,
     HEIGHT_SCALE,
     TIME_SCALE;
@@ -134,7 +133,7 @@ function processProjectData(data) {
 
 // main function after data processing
 // create necessary data structure eg: tree
-function setupDataStructure(data, connections) {
+function generateHierarchy(data, connections) {
 
     // setting up the data structure
     const stratify = d3.stratify()
@@ -197,10 +196,10 @@ function hasChildren(d) {
 
 function getTaskByID(id, data) {
     let task = data.filter((d) => d.ID === id);
-    return task ? task[0] : undefined;
+    return task ? task[0] : null;
 }
 
-function checkId(node, id_queue) {
+function getNodeIndex(node, id_queue) {
     let i = id_queue.indexOf(node.id);
 
     // if node is collapsed id isn't found in idqueue
@@ -272,23 +271,27 @@ function onDoubleClickTaskRectangle(hierarchy, connections, queue) {
 }
 
 function render(hierarchy, data, connections, queue, id_queue) {
-    // top level container
-    SVG = d3.select("#gantt-container")
-        .append("svg")
-        .attr("width", W)
-        .attr("height", H)
-        .attr("class", "svg")
-        .attr("overflow", "scroll");
+    function renderContainer() {
+        return d3.select("#gantt-container")
+            .append("svg")
+            .attr("width", W)
+            .attr("height", H)
+            .attr("class", "svg")
+            .attr("overflow", "scroll");
+    }
 
-    // time slider - behind  everything
-    let dragPosition = d3.mean(TIME_SCALE.range());
+    // top level container
+    let svg = renderContainer();
 
     // main container for gantt chart
-    GANTT = SVG.append("g")
+    GANTT = svg.append("g")
         .attr("id", "gantt")
         .attr("transform", "translate(20,20)");
 
     drawConnections(connections, id_queue);
+
+    // time slider - behind  everything
+    let dragPosition = d3.mean(TIME_SCALE.range());
 
     GANTT.append("path")
         .attr("id", "date-selector")
@@ -309,7 +312,7 @@ function render(hierarchy, data, connections, queue, id_queue) {
     _grp.append("rect")
         .attr("id", d => "id" + d.id)
         .attr("x", d => TIME_SCALE(d.data.Start))
-        .attr("y", (d) => HEIGHT_SCALE(checkId(d, id_queue) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(getNodeIndex(d, id_queue) + 1))
         .attr("width", d => {
             let _w = TIME_SCALE(d.data.Finish) - TIME_SCALE(d.data.Start);
             return _w > 10 ? _w : 10;
@@ -334,7 +337,7 @@ function render(hierarchy, data, connections, queue, id_queue) {
     _grp.append("rect")
         .attr("id", d => "progress" + d.id)
         .attr("x", d => TIME_SCALE(d.data.ActualStart))
-        .attr("y", (d) => HEIGHT_SCALE(checkId(d, id_queue) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(getNodeIndex(d, id_queue) + 1))
         .attr("transform", `translate(0,${PROGRESS_TOP_OFFSET})`)
         .attr("width", 10)
         .attr("height", PROGRESS_HT)
@@ -351,7 +354,7 @@ function render(hierarchy, data, connections, queue, id_queue) {
 
     _grp.append("rect")
         .attr("x", 0)
-        .attr("y", d => HEIGHT_SCALE(checkId(d, id_queue) + 1))
+        .attr("y", d => HEIGHT_SCALE(getNodeIndex(d, id_queue) + 1))
         .attr("width", W)
         .attr("height", 1)
         .attr("transform", `translate(0,${TASK_HT / 2})`)
@@ -361,7 +364,7 @@ function render(hierarchy, data, connections, queue, id_queue) {
     _grp.append("text")
         .text(d => /* hasChildren(d.data) ? d.data.TaskName.toUpperCase() : */ d.data.TaskName)
         .attr("x",/* d =>  hasChildren(d.data) ? timeScale(d.data.Start) + 10 : */ 10)
-        .attr("y", (d) => HEIGHT_SCALE(checkId(d, id_queue) + 1))
+        .attr("y", (d) => HEIGHT_SCALE(getNodeIndex(d, id_queue) + 1))
         .attr("class", "task")
         .attr("transform", `translate(0,${TASK_NAME_TOP_OFFSET})`)
         .each(function () {
@@ -385,20 +388,21 @@ function render(hierarchy, data, connections, queue, id_queue) {
 }
 
 // path points for connection lines
-function generateConnectionPoints(k, id_queue) {
-    // [x,y]
+// generates list of [x,y]
+function generateConnectionPoints(connection_info, id_queue) {
+
     let offsetX = 3;
     let offsetY = TASK_HT / 2;
     let ptList,
         pta = [],
         ptb = [];
 
-    let a = k[1].data;// predecessor
-    let b = k[0].data;// item
+    let a = connection_info[1].data;// predecessor
+    let b = connection_info[0].data;// item
 
     let _typea, _typeb;
-    if (k[2]) {
-        let _type = k[2].split("")
+    if (connection_info[2]) {
+        let _type = connection_info[2].split("")
         _typea = _type[1] === "S" ? "Start" : "Finish";
         _typeb = _type[0] === "S" ? "Start" : "Finish";
     } else {
@@ -410,10 +414,9 @@ function generateConnectionPoints(k, id_queue) {
     // collapsed nodes are not found in queue
     // in that case use parent's position
 
-    // console.log(`id ${a.ID} con ${queue[checkId(k[1], id_queue)].id} -- id ${b.ID} con ${queue[checkId(k[0], id_queue)].id}`);
-    let ya = HEIGHT_SCALE(checkId(k[1], id_queue) + 1) + offsetY;
+    let ya = HEIGHT_SCALE(getNodeIndex(connection_info[1], id_queue) + 1) + offsetY;
     let xb = TIME_SCALE(b[_typeb]);
-    let yb = HEIGHT_SCALE(checkId(k[0], id_queue) + 1) + offsetY;
+    let yb = HEIGHT_SCALE(getNodeIndex(connection_info[0], id_queue) + 1) + offsetY;
     let sign = +a.ID > +b.ID ? -1 : 1;// predecessor id > item id
     let factor = (offsetY + GAP / 3) * sign;
     if (_typea === "Start") {
@@ -434,18 +437,21 @@ function generateConnectionPoints(k, id_queue) {
     }
 
     ptList = [...pta, ...ptb].sort((a, b) => a[1] - b[1]);
-    //console.log([k,ptList])
+
     return LINE_GEN_OUTPUT_POINTS ? ptList : LINE_GENERATOR(ptList);
 }
 
 function drawConnections(connections, id_queue) {
     let _connections = connections.filter(con => {
-        let boolList = [];
-        con.slice(0, 2).forEach(d => {
-            boolList.push(id_queue.includes(d.id));
-        });
-        return boolList.every(i => i);
+        return con
+            .slice(0, 2)
+            .reduce(
+                (acc, item) => {
+                    acc.push(id_queue.includes(item.id));
+                    return acc;
+                }, []).every(i => i);
     });
+
     GANTT.append("g")
         .attr("id", "task-connections")
         .selectAll("path")
@@ -457,18 +463,18 @@ function drawConnections(connections, id_queue) {
         .attr("id", d => "con_" + d[1].id + "_" + d[0].id)
         .attr("d", (k) => generateConnectionPoints(k, id_queue))
         .on("mouseover", function (k) {
-            if (!checkSelection(k[0].id)) {
+            if (!isSelected(k[0].id)) {
                 d3.select("#id" + k[0].id).attr("class", "select-rect");
             }
-            if (!checkSelection(k[1].id)) {
+            if (!isSelected(k[1].id)) {
                 d3.select("#id" + k[1].id).attr("class", "select-rect");
             }
         })
         .on("mouseout", function (k) {
-            if (!checkSelection(k[0].id)) {
+            if (!isSelected(k[0].id)) {
                 d3.select("#id" + k[0].id).attr("class", "task-rect");
             }
-            if (!checkSelection(k[1].id)) {
+            if (!isSelected(k[1].id)) {
                 d3.select("#id" + k[1].id).attr("class", "task-rect");
             }
         })
@@ -499,7 +505,7 @@ function updateConnections(connections, id_queue) {
                 .attr("display", function () {
                     setTimeout(() => this.removeAttribute("display"), DURATION / 2)
                 });
-        } // toggle filtered class 
+        } // toggle filtered class
 
         return val;
     });
@@ -513,7 +519,7 @@ function updateConnections(connections, id_queue) {
                 this.setAttribute("display", "none")
             }, DURATION / 2);
         });
-    // change d attr 
+    // change d attr
     d3.select("#task-connections")
         .selectAll("path")
         .transition()
@@ -538,7 +544,7 @@ function toggleNodes(node, hierarchy, connections, queue) {
 
     updateHeight(queue);
     updateConnections(connections, id_queue);
-    SVG
+    d3.select("#gantt-container>svg")
         .transition()
         .duration(DURATION)
         .attr("height", H);
@@ -628,7 +634,7 @@ function isVisibilityAllowed(d) {
     }
 }
 
-function checkSelection(id) {
+function isSelected(id) {
     return d3.select("#id" + id).attr("class").includes("selected");
 }
 
@@ -733,7 +739,7 @@ function setupEventListeners(data, hierarchy, connections) {
 
     // resize
     window.addEventListener("resize", () => {
-        SVG.remove();
+        document.querySelector("#gantt-container>svg").remove();
         let [q, iq] = generateDataQueue(hierarchy)
         updateHeight(q);
         updateWidth();
@@ -746,7 +752,7 @@ function setupEventListeners(data, hierarchy, connections) {
 (async () => {
     let rawData = await getData("./data/convertcsv.json");
     let {data, connections} = processProjectData(cleanJson(rawData));
-    let hierarchy = setupDataStructure(data, connections);
+    let hierarchy = generateHierarchy(data, connections);
     let [queue, id_queue] = generateDataQueue(hierarchy);
     // path generator for dependency links
     LINE_GENERATOR = d3.line()
